@@ -1,0 +1,76 @@
+﻿@model OEletronico.Models.Pessoa
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Editar Colaborador";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Editar colaborador</h1>
+        <p class="page-sub">Atualize os dados de <strong>@Model.Nome</strong></p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline">← Voltar</a>
+</div>
+
+<div class="form-layout">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card form-card">
+            <div class="card-header">
+                <span class="card-header-icon">👤</span>
+                <span class="card-header-title">Dados pessoais</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field-group full">
+                        <label asp-for="Nome">Nome completo</label>
+                        <input asp-for="Nome" />
+                    </div>
+
+                    <div class="field-group full">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" type="email" />
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="Cargo">Cargo</label>
+                        <select asp-for="Cargo">
+                            <option value="CLT">CLT</option>
+                            <option value="Estagiario">Estagiário</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="Setor">Setor</label>
+                        <input asp-for="Setor" />
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="DataAdmissao">Data de admissão</label>
+                        <input asp-for="DataAdmissao" type="date" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card form-card" style="margin-top:20px">
+            <div class="card-header">
+                <span class="card-header-icon">🔑</span>
+                <span class="card-header-title">Redefinir senha (opcional)</span>
+            </div>
+            <div class="card-body">
+                <div class="field-group">
+                    <label>Nova senha (deixe em branco para manter atual)</label>
+                    <input type="password" name="NovaSenha" placeholder="Mín. 6 caracteres" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-outline">Cancelar</a>
+            <button type="submit" class="btn btn-primary">✓ Salvar alterações</button>
+        </div>
+    </form>
+</div>

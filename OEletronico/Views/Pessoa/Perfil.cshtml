@@ -1,0 +1,97 @@
+﻿@model OEletronico.Models.Pessoa
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Meu Perfil";
+    var iniciais = string.Join("", Model.Nome.Split(' ').Take(2).Select(n => n[0])).ToUpper();
+    var cargoLabel = Model.Cargo.ToString() == "Estagiario" ? "Estagiário" : Model.Cargo.ToString();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Meu perfil</h1>
+        <p class="page-sub">Visualize e atualize seus dados pessoais</p>
+    </div>
+</div>
+
+<!-- CARD DE IDENTIFICAÇÃO -->
+<div class="card form-card" style="margin-bottom:20px">
+    <div class="card-body" style="padding:24px">
+        <div style="display:flex;align-items:center;gap:20px;">
+            <div style="width:72px;height:72px;border-radius:50%;background:#2563a8;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;">
+                @iniciais
+            </div>
+            <div>
+                <div style="font-size:20px;font-weight:600;color:#111827;">@Model.Nome</div>
+                <div style="font-size:14px;color:#6b7280;margin-top:4px;">
+                    <span class="badge @(Model.Cargo.ToString() == "CLT" ? "badge-blue" : "badge-gray")">@cargoLabel</span>
+                    &nbsp;·&nbsp; @Model.Setor
+                </div>
+                <div style="font-size:13px;color:#6b7280;margin-top:6px;">
+                    📧 @Model.Email
+                </div>
+                <div style="font-size:13px;color:#6b7280;margin-top:2px;">
+                    📅 Admitido em @Model.DataAdmissao.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FORMULÁRIO DE DADOS -->
+<div class="form-layout">
+    <form asp-action="Perfil" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Cargo" />
+        <input type="hidden" asp-for="DataAdmissao" />
+
+        <div class="card form-card">
+            <div class="card-header">
+                <span class="card-header-icon">✏️</span>
+                <span class="card-header-title">Atualizar dados pessoais</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field-group full">
+                        <label asp-for="Nome">Nome completo</label>
+                        <input asp-for="Nome" />
+                    </div>
+                    <div class="field-group full">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" type="email" />
+                    </div>
+                    <div class="field-group full">
+                        <label asp-for="Setor">Setor</label>
+                        <input asp-for="Setor" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card form-card" style="margin-top:20px">
+            <div class="card-header">
+                <span class="card-header-icon">🔐</span>
+                <span class="card-header-title">Alterar senha (opcional)</span>
+            </div>
+            <div class="card-body">
+                <p style="font-size:13px;color:#6b7280;margin-bottom:14px;">
+                    Para alterar sua senha, preencha os campos abaixo. Deixe em branco para manter a senha atual.
+                </p>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Senha atual</label>
+                        <input type="password" name="SenhaAtual" placeholder="Sua senha atual" />
+                    </div>
+                    <div class="field-group">
+                        <label>Nova senha</label>
+                        <input type="password" name="NovaSenha" placeholder="Mín. 6 caracteres" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">✓ Salvar alterações</button>
+        </div>
+    </form>
+</div>

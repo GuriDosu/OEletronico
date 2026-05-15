@@ -1,0 +1,88 @@
+﻿@model OEletronico.Models.DTOs.LoginDTO
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "Login";
+}
+
+<div class="login-wrapper">
+    <div class="login-left">
+        <div class="brand-block">
+            <div class="brand-icon">⚡</div>
+            <h1 class="brand-name">O Eletrônico</h1>
+            <p class="brand-sub">Sistema de Gestão Empresarial</p>
+        </div>
+        <div class="brand-features">
+            <div class="feat"><span class="feat-dot"></span>Controle de estoque</div>
+            <div class="feat"><span class="feat-dot"></span>Registro de ponto</div>
+            <div class="feat"><span class="feat-dot"></span>Banco de horas</div>
+            <div class="feat"><span class="feat-dot"></span>Relatórios gerenciais</div>
+        </div>
+    </div>
+
+    <div class="login-right">
+        <div class="login-card">
+            <div class="login-card-header">
+                <h2>Acesse sua conta</h2>
+                <p>Digite suas credenciais para continuar</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ViewBag.Erro))
+            {
+                <div class="alert-erro">
+                    <span class="alert-icon">⚠</span>
+                    @ViewBag.Erro
+                </div>
+            }
+
+            <form asp-action="Login" asp-controller="Auth" method="post" class="login-form">
+                @Html.AntiForgeryToken()
+
+                <div class="field-group">
+                    <label asp-for="Login">Login</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input asp-for="Login" type="text" placeholder="Digite seu login" required />
+                    </div>
+                    <span asp-validation-for="Login" class="field-error"></span>
+                </div>
+
+                <div class="field-group">
+                    <label asp-for="Senha">Senha</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input asp-for="Senha" type="password" id="senha-input" placeholder="Digite sua senha" required />
+                        <button type="button" class="toggle-senha" onclick="toggleSenha()">
+                            <span id="olho-icon">👁</span>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Senha" class="field-error"></span>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <span>Entrar</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </form>
+
+            <p class="login-footer-text">
+                Problemas de acesso? Fale com o <strong>administrador</strong>.
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSenha() {
+            var input = document.getElementById('senha-input');
+            var icon  = document.getElementById('olho-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁';
+            }
+        }
+    </script>
+}

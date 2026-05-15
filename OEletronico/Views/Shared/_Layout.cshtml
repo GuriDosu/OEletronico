@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — O Eletrônico</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div id="app-layout">
+
+        <aside id="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">⚡</span>
+                <div>
+                    <div class="logo-name">O Eletrônico</div>
+                    <div class="logo-sub">Gestão Empresarial</div>
+                </div>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar">@(Context.Session.GetString("UserInitials") ?? "??")</div>
+                <div>
+                    <div class="user-name">@(Context.Session.GetString("UserName") ?? "Usuário")</div>
+                    <div class="user-role">@(Context.Session.GetString("UserCargo") ?? "")</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- TODOS veem o Perfil e Produtos -->
+                <div class="nav-section">Geral</div>
+                <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil">
+                    <span class="nav-icon">👤</span> Meu Perfil
+                </a>
+                <a class="nav-item" asp-controller="Produto" asp-action="Index">
+                    <span class="nav-icon">📦</span> Produtos
+                </a>
+
+                @if (Context.Session.GetString("UserCargo") == "Admin")
+                {
+                    <div class="nav-section">Administração</div>
+                    <a class="nav-item" asp-controller="Pessoa" asp-action="Index">
+                        <span class="nav-icon">👥</span> Colaboradores
+                    </a>
+                }
+            </nav>
+
+            <div class="sidebar-footer">
+                <a asp-controller="Auth" asp-action="Logout" class="logout-link">
+                    <span>⏻</span> Sair
+                </a>
+            </div>
+        </aside>
+
+        <div id="main-area">
+            <header id="topbar">
+                <span class="topbar-title">@ViewData["Title"]</span>
+                <div class="topbar-right">
+                    <span id="topbar-date" class="topbar-date"></span>
+                    <div class="topbar-avatar">@(Context.Session.GetString("UserInitials") ?? "??")</div>
+                </div>
+            </header>
+
+            <main id="page-content">
+                @if (TempData["Sucesso"] != null)
+                {
+                    <div class="alert-sucesso">✓ @TempData["Sucesso"]</div>
+                }
+                @if (TempData["Erro"] != null)
+                {
+                    <div class="alert-erro-top">⚠ @TempData["Erro"]</div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,106 @@
+﻿@model IEnumerable<OEletronico.Models.Pessoa>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Colaboradores";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Colaboradores</h1>
+        <p class="page-sub">Gerencie os colaboradores cadastrados no sistema</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Novo colaborador</a>
+</div>
+
+<div class="filter-bar">
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="busca" placeholder="Buscar por nome ou email..." oninput="filtrar()" />
+    </div>
+    <select id="filtro-cargo" onchange="filtrar()">
+        <option value="">Todos os cargos</option>
+        <option value="CLT">CLT</option>
+        <option value="Estagiario">Estagiário</option>
+    </select>
+</div>
+
+<div class="card">
+    @if (Model.Any())
+    {
+        <table class="data-table" id="tabela-colaboradores">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Email</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>Admissão</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    var iniciais = string.Join("", p.Nome.Split(' ').Take(2).Select(n => n[0])).ToUpper();
+                    var cargoBadge = p.Cargo.ToString() == "CLT" ? "badge-blue" : "badge-gray";
+                    var cargoLabel = p.Cargo.ToString() == "Estagiario" ? "Estagiário" : p.Cargo.ToString();
+
+                    <tr data-cargo="@p.Cargo" data-nome="@p.Nome.ToLower()" data-email="@p.Email.ToLower()">
+                        <td>
+                            <div class="colab-cell">
+                                <div class="colab-avatar">@iniciais</div>
+                                <div>
+                                    <div class="colab-nome">@p.Nome</div>
+                                    <div class="colab-login">@p.Usuario?.Login</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-muted">@p.Email</td>
+                        <td><span class="badge @cargoBadge">@cargoLabel</span></td>
+                        <td>@p.Setor</td>
+                        <td>@p.DataAdmissao.ToString("dd/MM/yyyy")</td>
+                        <td><span class="badge badge-green">Ativo</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm" title="Editar">✏</a>
+                                <form asp-action="Delete" asp-route-id="@p.Id" method="post"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Excluir @p.Nome?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <p>Nenhum colaborador cadastrado ainda.</p>
+            <a asp-action="Create" class="btn btn-primary">Cadastrar primeiro colaborador</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filtrar() {
+            var busca = document.getElementById('busca').value.toLowerCase();
+            var cargo = document.getElementById('filtro-cargo').value;
+            var rows = document.querySelectorAll('#tabela-colaboradores tbody tr');
+            rows.forEach(function (row) {
+                var nome  = row.dataset.nome || '';
+                var email = row.dataset.email || '';
+                var rc    = row.dataset.cargo || '';
+                var ok = (!busca || nome.indexOf(busca) > -1 || email.indexOf(busca) > -1)
+                      && (!cargo || rc === cargo);
+                row.style.display = ok ? '' : 'none';
+            });
+        }
+    </script>
+}

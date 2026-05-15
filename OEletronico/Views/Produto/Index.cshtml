@@ -1,0 +1,156 @@
+﻿@model IEnumerable<OEletronico.Models.Produto>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Produtos";
+    var ehAdmin = Context.Session.GetString("UserCargo") == "Admin";
+    var totalProdutos = Model.Count();
+    var totalEstoque = Model.Sum(p => p.Quantidade);
+    var valorEstoque = Model.Sum(p => p.Preco * p.Quantidade);
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Produtos</h1>
+        <p class="page-sub">
+            @if (ehAdmin)
+            {
+                <span>Gerencie o catálogo de produtos do sistema</span>
+            }
+            else
+            {
+                <span>Consulte os produtos disponíveis no estoque</span>
+            }
+        </p>
+    </div>
+    @if (ehAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary">+ Novo produto</a>
+    }
+</div>
+
+<!-- CARDS DE RESUMO -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+    <div class="card" style="margin:0;padding:18px 20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:6px;">📦 TOTAL DE PRODUTOS</div>
+        <div style="font-size:26px;font-weight:700;color:#111827;">@totalProdutos</div>
+    </div>
+    <div class="card" style="margin:0;padding:18px 20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:6px;">📊 UNIDADES EM ESTOQUE</div>
+        <div style="font-size:26px;font-weight:700;color:#2563eb;">@totalEstoque</div>
+    </div>
+    <div class="card" style="margin:0;padding:18px 20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:6px;">💰 VALOR TOTAL DO ESTOQUE</div>
+        <div style="font-size:26px;font-weight:700;color:#16a34a;">R$ @valorEstoque.ToString("N2")</div>
+    </div>
+</div>
+
+<!-- FILTROS -->
+<form method="get" asp-action="Index">
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="busca" value="@ViewBag.Busca" placeholder="Buscar por nome ou código..." />
+        </div>
+        <select name="filtro" onchange="this.form.submit()">
+            <option value="">Todos os estoques</option>
+            <option value="normal" selected="@(ViewBag.Filtro == "normal")">Normal (10+)</option>
+            <option value="baixo" selected="@(ViewBag.Filtro == "baixo")">Estoque baixo (&lt; 10)</option>
+            <option value="esgotado" selected="@(ViewBag.Filtro == "esgotado")">Esgotado</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn">Limpar</a>
+    </div>
+</form>
+
+<!-- TABELA -->
+<div class="card">
+    @if (Model.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Produto</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Valor Total</th>
+                    <th>Status</th>
+                    @if (ehAdmin)
+                    {
+                        <th>Ações</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    var statusClass = "badge-green";
+                    var statusText = "Em estoque";
+                    if (p.Quantidade == 0)
+                    {
+                        statusClass = "badge-red";
+                        statusText = "Esgotado";
+                    }
+                    else if (p.Quantidade < 10)
+                    {
+                        statusClass = "badge-amber";
+                        statusText = "Estoque baixo";
+                    }
+
+                    <tr>
+                        <td>
+                            <code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">
+                                @p.Codigo
+                            </code>
+                        </td>
+                        <td><strong>@p.Nome</strong></td>
+                        <td>R$ @p.Preco.ToString("N2")</td>
+                        <td>
+                            <span style="font-weight:600;">@p.Quantidade</span> un.
+                        </td>
+                        <td style="color:#16a34a;font-weight:600;">
+                            R$ @((p.Preco * p.Quantidade).ToString("N2"))
+                        </td>
+                        <td>
+                            <span class="badge @statusClass">@statusText</span>
+                        </td>
+                        @if (ehAdmin)
+                        {
+                            <td>
+                                <div class="action-btns">
+                                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm" title="Editar">✏</a>
+                                    <form asp-action="Delete" asp-route-id="@p.Id" method="post"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Excluir produto @p.Nome?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
+                                    </form>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <p>Nenhum produto cadastrado ainda.</p>
+            @if (ehAdmin)
+            {
+                <a asp-action="Create" class="btn btn-primary">Cadastrar primeiro produto</a>
+            }
+        </div>
+    }
+</div>
+
+@{
+    var badgeAmberStyle = "background:#fef3c7;color:#d97706;";
+}
+
+<style>
+    .badge-amber { @Html.Raw(badgeAmberStyle)
+    }
+</style>
