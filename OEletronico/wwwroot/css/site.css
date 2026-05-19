@@ -2,6 +2,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
 }
 
 :root {
@@ -18,24 +19,36 @@
     --green-bg: #dcfce7;
     --red: #dc2626;
     --red-bg: #fee2e2;
+    --amber: #d97706;
+    --amber-bg: #fef3c7;
     --blue: #2563eb;
     --blue-bg: #dbeafe;
     --sidebar-w: 224px;
 }
 
+html, body {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 #app-layout {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    width: 100%;
 }
 
-/* SIDEBAR */
+/* ─── SIDEBAR ─── */
 #sidebar {
     width: var(--sidebar-w);
     background: var(--brand);
@@ -87,6 +100,9 @@ body {
     font-size: 13px;
     font-weight: 700;
     color: #fff;
+    line-height: 1;
+    text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 .user-name {
@@ -125,7 +141,7 @@ body {
     font-weight: 500;
     text-decoration: none;
     border-left: 3px solid transparent;
-    transition: all 0.15s;
+    transition: background-color 0.15s, color 0.15s;
 }
 
     .nav-item:hover {
@@ -155,13 +171,14 @@ body {
     color: rgba(255,255,255,0.45);
     font-size: 13px;
     text-decoration: none;
+    transition: color 0.15s;
 }
 
     .logout-link:hover {
         color: #fff;
     }
 
-/* MAIN AREA */
+/* ─── MAIN AREA ─── */
 #main-area {
     flex: 1;
     display: flex;
@@ -182,6 +199,7 @@ body {
 .topbar-title {
     font-size: 15px;
     font-weight: 600;
+    color: var(--text);
 }
 
 .topbar-right {
@@ -206,6 +224,9 @@ body {
     font-size: 11px;
     font-weight: 700;
     color: #fff;
+    line-height: 1;
+    text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 #page-content {
@@ -214,7 +235,7 @@ body {
     padding: 28px;
 }
 
-/* PAGE HEADER */
+/* ─── PAGE HEADER ─── */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -224,6 +245,7 @@ body {
 .page-title {
     font-size: 20px;
     font-weight: 700;
+    color: var(--text);
 }
 
 .page-sub {
@@ -232,7 +254,7 @@ body {
     margin-top: 4px;
 }
 
-/* BUTTONS */
+/* ─── BOTÕES ─── */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -247,6 +269,7 @@ body {
     background: var(--surface);
     color: var(--text);
     transition: all 0.15s;
+    font-family: inherit;
 }
 
     .btn:hover {
@@ -282,7 +305,7 @@ body {
     font-size: 12px;
 }
 
-/* CARDS */
+/* ─── CARDS ─── */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -307,13 +330,14 @@ body {
 .card-header-title {
     font-size: 14px;
     font-weight: 600;
+    color: var(--text);
 }
 
 .card-body {
     padding: 20px 24px;
 }
 
-/* TABLES */
+/* ─── TABELAS ─── */
 .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -333,6 +357,7 @@ body {
     .data-table td {
         padding: 11px 16px;
         border-bottom: 1px solid var(--border);
+        color: var(--text);
     }
 
     .data-table tr:last-child td {
@@ -347,7 +372,7 @@ body {
     color: var(--text-muted) !important;
 }
 
-/* BADGES */
+/* ─── BADGES ─── */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -367,6 +392,11 @@ body {
     color: var(--red);
 }
 
+.badge-amber {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
 .badge-blue {
     background: var(--blue-bg);
     color: var(--blue);
@@ -377,17 +407,19 @@ body {
     color: var(--text-muted);
 }
 
-/* FILTER BAR */
+/* ─── FILTER BAR ─── */
 .filter-bar {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .search-wrap {
     position: relative;
     flex: 1;
+    min-width: 220px;
 }
 
 .search-icon {
@@ -405,7 +437,13 @@ body {
     border-radius: 8px;
     font-size: 13px;
     background: var(--surface);
+    outline: none;
+    font-family: inherit;
 }
+
+    .filter-bar input:focus {
+        border-color: var(--brand-mid);
+    }
 
 .filter-bar select {
     padding: 9px 12px;
@@ -414,9 +452,10 @@ body {
     font-size: 13px;
     background: var(--surface);
     cursor: pointer;
+    font-family: inherit;
 }
 
-/* COLAB CELL */
+/* ─── COLAB CELL ─── */
 .colab-cell {
     display: flex;
     align-items: center;
@@ -434,6 +473,9 @@ body {
     font-size: 11px;
     font-weight: 700;
     color: #fff;
+    line-height: 1;
+    text-transform: uppercase;
+    flex-shrink: 0;
 }
 
 .colab-nome {
@@ -452,7 +494,7 @@ body {
     gap: 4px;
 }
 
-/* FORMS */
+/* ─── FORMS ─── */
 .form-layout {
     max-width: 720px;
 }
@@ -476,6 +518,7 @@ body {
     .field-group label {
         font-size: 12px;
         font-weight: 600;
+        color: var(--text);
     }
 
 .required {
@@ -491,6 +534,7 @@ body {
     background: #fafafa;
     outline: none;
     transition: border-color 0.15s, background 0.15s;
+    font-family: inherit;
 }
 
     .field-group input:focus,
@@ -523,7 +567,7 @@ body {
     margin-top: 16px;
 }
 
-/* EMPTY STATE */
+/* ─── EMPTY STATE ─── */
 .empty-state {
     text-align: center;
     padding: 48px 24px;
@@ -540,7 +584,7 @@ body {
     font-size: 14px;
 }
 
-/* ALERTS */
+/* ─── ALERTS ─── */
 .alert-sucesso, .alert-erro-top {
     display: flex;
     align-items: center;

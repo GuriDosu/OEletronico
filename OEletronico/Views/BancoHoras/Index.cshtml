@@ -1,0 +1,102 @@
+﻿@model OEletronico.Models.BancoHoras
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Meu Banco de Horas";
+    var pontosMes = ViewBag.PontosMes as List<OEletronico.Models.RegistroPonto> ?? new List<OEletronico.Models.RegistroPonto>();
+    var totalDiasTrabalhados = pontosMes.Count(p => p.HoraSaida.HasValue);
+    var corSaldo = Model.Saldo > 0 ? "#16a34a" : (Model.Saldo < 0 ? "#dc2626" : "#6b7280");
+    var sinalSaldo = Model.Saldo > 0 ? "+" : "";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Meu Banco de Horas</h1>
+        <p class="page-sub">Acompanhe seu saldo de horas trabalhadas no mês</p>
+    </div>
+</div>
+
+<!-- CARDS DE RESUMO -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">⏱️ HORAS NORMAIS</div>
+        <div style="font-size:26px;font-weight:700;color:#2563eb;">@Model.HorasNormais.ToString("F2")h</div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">⚡ HORAS EXTRAS</div>
+        <div style="font-size:26px;font-weight:700;color:#f59e0b;">@Model.HorasExtras.ToString("F2")h</div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">💼 SALDO ATUAL</div>
+        <div style="font-size:26px;font-weight:700;color:@corSaldo;">@sinalSaldo@Model.Saldo.ToString("F2")h</div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">📅 DIAS NO MÊS</div>
+        <div style="font-size:26px;font-weight:700;color:#111827;">@totalDiasTrabalhados</div>
+    </div>
+</div>
+
+<!-- INFO SOBRE O SALDO -->
+<div class="card" style="background:#dbeafe;padding:16px 20px;border-left:4px solid #2563eb;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+        <span style="font-size:24px;">ℹ</span>
+        <div style="font-size:13px;color:#1e40af;">
+            <strong>Como funciona o cálculo:</strong> Jornada padrão de 8h/dia (descontado 1h de almoço).
+            Horas trabalhadas acima de 8h vão para <strong>horas extras</strong>.
+            Horas abaixo de 8h reduzem seu <strong>saldo</strong>.
+        </div>
+    </div>
+</div>
+
+<!-- HISTÓRICO DO MÊS -->
+<div class="card" style="margin-top:20px;">
+    <div class="card-header">
+        <span class="card-header-icon">📊</span>
+        <span class="card-header-title">Detalhamento do mês</span>
+    </div>
+    @if (pontosMes.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Líquido</th>
+                    <th>Saldo do dia</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in pontosMes.OrderByDescending(p => p.Data))
+                {
+                    string liquido = "--";
+                    string saldoDia = "--";
+                    string corSaldoDia = "#6b7280";
+
+                    if (p.HoraSaida.HasValue)
+                    {
+                        var horas = (p.HoraSaida.Value - p.HoraEntrada).TotalHours - 1.0;
+                        liquido = $"{horas:F2}h";
+                        var saldoCalc = horas - 8.0;
+                        saldoDia = (saldoCalc > 0 ? "+" : "") + $"{saldoCalc:F2}h";
+                        corSaldoDia = saldoCalc > 0 ? "#16a34a" : (saldoCalc < 0 ? "#dc2626" : "#6b7280");
+                    }
+
+                    <tr>
+                        <td><strong>@p.Data.ToLocalTime().ToString("dd/MM/yyyy")</strong></td>
+                        <td>@p.HoraEntrada.ToString(@"hh\:mm")</td>
+                        <td>@(p.HoraSaida.HasValue ? p.HoraSaida.Value.ToString(@"hh\:mm") : "--:--")</td>
+                        <td>@liquido</td>
+                        <td style="color:@corSaldoDia;font-weight:700;">@saldoDia</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>Nenhum registro de ponto neste mês.</p>
+        </div>
+    }
+</div>

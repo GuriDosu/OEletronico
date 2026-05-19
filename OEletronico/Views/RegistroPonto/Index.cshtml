@@ -1,0 +1,179 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Registro de Ponto";
+    var pontoHoje = ViewBag.PontoHoje as OEletronico.Models.RegistroPonto;
+    var historico = ViewBag.Historico as List<OEletronico.Models.RegistroPonto> ?? new List<OEletronico.Models.RegistroPonto>();
+    var jaBateuEntrada = pontoHoje != null;
+    var jaBateuSaida = pontoHoje != null && pontoHoje.HoraSaida.HasValue;
+    var userName = Context.Session.GetString("UserName") ?? "Colaborador";
+    var userCargo = Context.Session.GetString("UserCargo") ?? "";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Registro de Ponto</h1>
+        <p class="page-sub">Bata seu ponto de entrada e saída</p>
+    </div>
+</div>
+
+<!-- RELÓGIO E STATUS -->
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:24px;">
+
+    <!-- CARD DO RELÓGIO -->
+    <div class="card" style="margin:0;padding:0;background:linear-gradient(135deg,#1a3a5c 0%,#2563a8 100%);color:#fff;">
+        <div style="padding:32px 28px;">
+            <div style="font-size:13px;opacity:0.8;margin-bottom:8px;">Olá, @userName 👋</div>
+            <div style="font-size:60px;font-weight:700;letter-spacing:-2px;line-height:1;" id="relogio">--:--:--</div>
+            <div style="font-size:14px;opacity:0.8;margin-top:8px;" id="dataAtual">--</div>
+        </div>
+    </div>
+
+    <!-- CARD DE STATUS -->
+    <div class="card" style="margin:0;padding:24px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:14px;letter-spacing:1px;">STATUS DE HOJE</div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:20px;">@(jaBateuEntrada ? "✅" : "⏳")</span>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;">Entrada</div>
+                        <div style="font-size:11px;color:#6b7280;">@(jaBateuEntrada ? "Registrada" : "Aguardando")</div>
+                    </div>
+                </div>
+                <div style="font-size:18px;font-weight:700;color:@(jaBateuEntrada ? "#16a34a" : "#9ca3af");">
+                    @(jaBateuEntrada ? pontoHoje!.HoraEntrada.ToString(@"hh\:mm") : "--:--")
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid #e5e7eb;padding-top:14px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:20px;">@(jaBateuSaida ? "✅" : "⏳")</span>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;">Saída</div>
+                        <div style="font-size:11px;color:#6b7280;">@(jaBateuSaida ? "Registrada" : "Aguardando")</div>
+                    </div>
+                </div>
+                <div style="font-size:18px;font-weight:700;color:@(jaBateuSaida ? "#16a34a" : "#9ca3af");">
+                    @(jaBateuSaida ? pontoHoje!.HoraSaida!.Value.ToString(@"hh\:mm") : "--:--")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOTÕES DE BATER PONTO -->
+<div style="display:flex;gap:16px;margin-bottom:32px;">
+    @if (!jaBateuEntrada)
+    {
+        <form asp-action="BaterEntrada" method="post" style="flex:1;">
+            @Html.AntiForgeryToken()
+            <button type="submit" style="width:100%;padding:18px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+                📥 BATER ENTRADA
+            </button>
+        </form>
+    }
+    else if (!jaBateuSaida)
+    {
+        <form asp-action="BaterSaida" method="post" style="flex:1;" onsubmit="return confirm('Confirma sua saída agora?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" style="width:100%;padding:18px;background:#dc2626;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,0.3);">
+                📤 BATER SAÍDA
+            </button>
+        </form>
+    }
+    else
+    {
+        <div style="flex:1;padding:18px;background:#dcfce7;color:#16a34a;border-radius:12px;font-size:15px;font-weight:600;text-align:center;">
+            🎉 Jornada concluída por hoje! Bom descanso!
+        </div>
+    }
+</div>
+
+<!-- HISTÓRICO -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-header-icon">📋</span>
+        <span class="card-header-title">Histórico (últimos 30 dias)</span>
+    </div>
+    @if (historico.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Horas Trabalhadas</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in historico)
+                {
+                    var horasTrab = "--";
+                    var statusClass = "badge-amber";
+                    var statusText = "Em aberto";
+                    var ehAtestado = r.EhAtestado;
+
+                    if (ehAtestado)
+                    {
+                        horasTrab = "Atestado";
+                        statusClass = "badge-blue";
+                        statusText = "🏥 Atestado";
+                    }
+                    else if (r.HoraSaida.HasValue)
+                    {
+                        var almoco = userCargo == "Estagiario" ? 0.0 : 1.0;
+                        var diff = (r.HoraSaida.Value - r.HoraEntrada).TotalHours - almoco;
+                        horasTrab = $"{diff:F2}h";
+                        statusClass = "badge-green";
+                        statusText = "Completo";
+                    }
+
+                    <tr style="@(ehAtestado ? "background:#dbeafe;" : "")">
+                        <td><strong>@r.Data.ToLocalTime().ToString("dd/MM/yyyy")</strong></td>
+                        <td>@(ehAtestado ? "--:--" : r.HoraEntrada.ToString(@"hh\:mm"))</td>
+                        <td>@(ehAtestado ? "--:--" : (r.HoraSaida.HasValue ? r.HoraSaida.Value.ToString(@"hh\:mm") : "--:--"))</td>
+                        <td><strong>@horasTrab</strong></td>
+                        <td>
+                            <span class="badge @statusClass">@statusText</span>
+                            @if (ehAtestado && !string.IsNullOrEmpty(r.ObservacaoAtestado))
+                            {
+                                <div style="font-size:11px;color:#1e40af;margin-top:4px;">@r.ObservacaoAtestado</div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <p>Nenhum registro de ponto ainda.</p>
+        </div>
+    }
+
+@section Scripts {
+    <script>
+        function atualizarRelogio() {
+            const agora = new Date();
+            const hh = String(agora.getHours()).padStart(2, '0');
+            const mm = String(agora.getMinutes()).padStart(2, '0');
+            const ss = String(agora.getSeconds()).padStart(2, '0');
+            document.getElementById('relogio').textContent = `${hh}:${mm}:${ss}`;
+
+            const dias = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+            const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+            const diaSemana = dias[agora.getDay()];
+            const dia = agora.getDate();
+            const mes = meses[agora.getMonth()];
+            const ano = agora.getFullYear();
+            document.getElementById('dataAtual').textContent = `${diaSemana}, ${dia} de ${mes} de ${ano}`;
+        }
+        atualizarRelogio();
+        setInterval(atualizarRelogio, 1000);
+    </script>
+}

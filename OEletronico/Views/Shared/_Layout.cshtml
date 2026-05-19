@@ -27,7 +27,7 @@
             </div>
 
             <nav class="sidebar-nav">
-                <!-- TODOS veem o Perfil e Produtos -->
+                <!-- TODOS veem o Perfil -->
                 <div class="nav-section">Geral</div>
                 <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil">
                     <span class="nav-icon">👤</span> Meu Perfil
@@ -35,12 +35,31 @@
                 <a class="nav-item" asp-controller="Produto" asp-action="Index">
                     <span class="nav-icon">📦</span> Produtos
                 </a>
+                <a class="nav-item" asp-controller="Movimentacao" asp-action="Index">
+                    <span class="nav-icon">🗃️</span> Movimentação
+                </a>
+
+                @if (Context.Session.GetString("UserCargo") != "Admin")
+                {
+                    
+                    <div class="nav-section">Ponto</div>
+                    <a class="nav-item" asp-controller="RegistroPonto" asp-action="Index">
+                        <span class="nav-icon">🕐</span> Bater Ponto
+                    </a>
+                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Index">
+                        <span class="nav-icon">💼</span> Meu Banco de Horas
+                    </a>
+                }
 
                 @if (Context.Session.GetString("UserCargo") == "Admin")
                 {
+                    
                     <div class="nav-section">Administração</div>
                     <a class="nav-item" asp-controller="Pessoa" asp-action="Index">
                         <span class="nav-icon">👥</span> Colaboradores
+                    </a>
+                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Admin">
+                        <span class="nav-icon">📊</span> Banco de Horas
                     </a>
                 }
             </nav>

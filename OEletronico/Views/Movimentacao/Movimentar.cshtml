@@ -1,0 +1,99 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Movimentar Estoque";
+    var produtos = ViewBag.Produtos as List<OEletronico.Models.Produto> ?? new List<OEletronico.Models.Produto>();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Movimentar estoque</h1>
+        <p class="page-sub">Registre entradas e saídas de produtos do estoque</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline">← Voltar</a>
+</div>
+
+<div class="form-layout">
+    <form asp-action="Movimentar" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="card form-card">
+            <div class="card-header">
+                <span class="card-header-icon">🔄</span>
+                <span class="card-header-title">Dados da movimentação</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label>Tipo de movimentação <span class="required">*</span></label>
+                        <select name="Tipo" id="tipoSelect" required>
+                            <option value="">Selecione...</option>
+                            <option value="Entrada">📥 Entrada (chegou produto)</option>
+                            <option value="Saida">📤 Saída (vendeu)</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Quantidade <span class="required">*</span></label>
+                        <input type="number" name="Quantidade" min="1" required placeholder="Ex.: 10" />
+                    </div>
+
+                    <div class="field-group full">
+                        <label>Produto <span class="required">*</span></label>
+                        <select name="ProdutoId" id="produtoSelect" required>
+                            <option value="0">Selecione um produto...</option>
+                            @foreach (var p in produtos)
+                            {
+                                <option value="@p.Id" data-qtd="@p.Quantidade">
+                                    @p.Nome (@p.Codigo) — Estoque: @p.Quantidade un.
+                                </option>
+                            }
+                        </select>
+                        <span id="estoqueInfo" style="font-size:11px;color:#6b7280;"></span>
+                    </div>
+                </div>
+
+                @if (!produtos.Any())
+                {
+                    <div class="info-box" style="background:#fef3c7;color:#92400e;">
+                        <span style="font-size:18px;">⚠</span>
+                        <div>
+                            Não há produtos cadastrados. <a asp-action="Cadastrar" style="color:#92400e;font-weight:700;">Cadastre o primeiro produto</a>.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="info-box">
+                        <span style="font-size:18px;">ℹ</span>
+                        <div>
+                            <strong>Atenção:</strong> O sistema atualiza automaticamente a quantidade do produto.
+                            Para <strong>saídas</strong>, é necessário ter estoque disponível.
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-outline">Cancelar</a>
+            <button type="submit" class="btn btn-primary" @(produtos.Any() ? "" : "disabled")>✓ Registrar movimentação</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Mostra estoque atual ao selecionar produto
+        document.getElementById('produtoSelect').addEventListener('change', function() {
+            var opcao = this.options[this.selectedIndex];
+            var info = document.getElementById('estoqueInfo');
+            if (opcao.value !== '0') {
+                var qtd = opcao.getAttribute('data-qtd');
+                info.innerHTML = '<strong>Estoque atual:</strong> ' + qtd + ' unidades';
+                info.style.color = qtd == 0 ? '#dc2626' : (qtd < 10 ? '#d97706' : '#16a34a');
+            } else {
+                info.innerHTML = '';
+            }
+        });
+    </script>
+}

@@ -83,7 +83,7 @@ namespace OEletronico.Controllers
             return RedirectToAction("Login");
         }
 
-        // ─── MÉTODO PRIVADO PARA GERAR JWT ─────────────────────────────
+        // ─── MÉTODO PRIVADO PARA GERAR JWT
         private string GerarToken(Usuario usuario)
         {
             var claims = new[]

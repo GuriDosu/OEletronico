@@ -14,7 +14,7 @@
         <p class="page-sub">
             @if (ehAdmin)
             {
-                <span>Gerencie o catálogo de produtos do sistema</span>
+                <span>Catálogo completo de produtos do sistema</span>
             }
             else
             {
@@ -24,7 +24,7 @@
     </div>
     @if (ehAdmin)
     {
-        <a asp-action="Create" class="btn btn-primary">+ Novo produto</a>
+        <a asp-action="ExportarExcel" class="btn btn-primary">📊 Exportar planilha</a>
     }
 </div>
 
@@ -99,29 +99,19 @@
 
                     <tr>
                         <td>
-                            <code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">
-                                @p.Codigo
-                            </code>
+                            <code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">@p.Codigo</code>
                         </td>
                         <td><strong>@p.Nome</strong></td>
                         <td>R$ @p.Preco.ToString("N2")</td>
-                        <td>
-                            <span style="font-weight:600;">@p.Quantidade</span> un.
-                        </td>
-                        <td style="color:#16a34a;font-weight:600;">
-                            R$ @((p.Preco * p.Quantidade).ToString("N2"))
-                        </td>
-                        <td>
-                            <span class="badge @statusClass">@statusText</span>
-                        </td>
+                        <td><span style="font-weight:600;">@p.Quantidade</span> un.</td>
+                        <td style="color:#16a34a;font-weight:600;">R$ @((p.Preco * p.Quantidade).ToString("N2"))</td>
+                        <td><span class="badge @statusClass">@statusText</span></td>
                         @if (ehAdmin)
                         {
                             <td>
                                 <div class="action-btns">
                                     <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm" title="Editar">✏</a>
-                                    <form asp-action="Delete" asp-route-id="@p.Id" method="post"
-                                          style="display:inline"
-                                          onsubmit="return confirm('Excluir produto @p.Nome?')">
+                                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:inline" onsubmit="return confirm('Excluir produto @p.Nome?')">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
                                     </form>
@@ -138,19 +128,7 @@
         <div class="empty-state">
             <div class="empty-icon">📦</div>
             <p>Nenhum produto cadastrado ainda.</p>
-            @if (ehAdmin)
-            {
-                <a asp-action="Create" class="btn btn-primary">Cadastrar primeiro produto</a>
-            }
+            <p style="font-size:13px;color:#6b7280;">Cadastre produtos na aba <strong>🗃️ Movimentação</strong>.</p>
         </div>
     }
 </div>
-
-@{
-    var badgeAmberStyle = "background:#fef3c7;color:#d97706;";
-}
-
-<style>
-    .badge-amber { @Html.Raw(badgeAmberStyle)
-    }
-</style>

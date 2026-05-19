@@ -7,8 +7,10 @@
         public TimeSpan HoraEntrada { get; set; }
         public TimeSpan? HoraSaida { get; set; }
 
-        public int PessoaId { get; set; }
+        public bool EhAtestado { get; set; } = false;
+        public string? ObservacaoAtestado { get; set; }
 
+        public int PessoaId { get; set; }
         public Pessoa Pessoa { get; set; } = null!;
     }
 }

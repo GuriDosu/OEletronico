@@ -1,0 +1,83 @@
+﻿@model OEletronico.Models.Produto
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Cadastrar Produto";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Cadastrar produto</h1>
+        <p class="page-sub">Adicione um novo produto ao catálogo do sistema</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline">← Voltar</a>
+</div>
+
+<!-- BLOCO DE ERROS DE VALIDAÇÃO -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px 16px;margin-bottom:20px;color:#dc2626;">
+        <strong>⚠ Não foi possível cadastrar:</strong>
+        <ul style="margin:8px 0 0 20px;">
+            @foreach (var erro in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@erro.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="form-layout">
+    <form asp-action="Cadastrar" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="card form-card">
+            <div class="card-header">
+                <span class="card-header-icon">📦</span>
+                <span class="card-header-title">Dados do produto</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label asp-for="Codigo">Código <span class="required">*</span></label>
+                        <input asp-for="Codigo" placeholder="Ex.: PRD-001" style="text-transform:uppercase" />
+                        <span style="font-size:11px;color:#6b7280;">Identificador único — não pode repetir</span>
+                        <span asp-validation-for="Codigo" class="field-error"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="Quantidade">Quantidade inicial <span class="required">*</span></label>
+                        <input asp-for="Quantidade" type="number" min="0" value="0" />
+                        <span style="font-size:11px;color:#6b7280;">Quantas unidades já estão em estoque</span>
+                        <span asp-validation-for="Quantidade" class="field-error"></span>
+                    </div>
+
+                    <div class="field-group full">
+                        <label asp-for="Nome">Nome do produto <span class="required">*</span></label>
+                        <input asp-for="Nome" placeholder="Ex.: Notebook Dell Inspiron 15" />
+                        <span style="font-size:11px;color:#6b7280;">Nome único — verifique se já não está cadastrado</span>
+                        <span asp-validation-for="Nome" class="field-error"></span>
+                    </div>
+
+                    <div class="field-group">
+                        <label asp-for="Preco">Preço unitário (R$) <span class="required">*</span></label>
+                        <input asp-for="Preco" type="number" step="0.01" min="0" placeholder="0.00" />
+                        <span asp-validation-for="Preco" class="field-error"></span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <span style="font-size:18px;">ℹ</span>
+                    <div>
+                        <strong>Importante:</strong> Se cadastrar com quantidade maior que zero, será criada
+                        automaticamente uma <strong>movimentação de entrada inicial</strong> no histórico.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-outline">Cancelar</a>
+            <button type="submit" class="btn btn-primary">✓ Cadastrar produto</button>
+        </div>
+    </form>
+</div>

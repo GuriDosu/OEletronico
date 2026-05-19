@@ -1,0 +1,105 @@
+﻿@model IEnumerable<OEletronico.Models.Pessoa>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Banco de Horas — Geral";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Banco de Horas — Geral</h1>
+        <p class="page-sub">Visualize o saldo de horas de todos os colaboradores</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a asp-action="RegistrarAtestado" class="btn">📋 Registrar atestado</a>
+        <a asp-action="ExportarPdf" class="btn btn-primary">📄 Exportar PDF</a>
+    </div>
+</div>
+
+<!-- CARDS DE RESUMO -->
+@{
+    var totalColabs = Model.Count();
+    var totalSaldo = Model.Sum(p => p.BancoHoras?.Saldo ?? 0);
+    var colabsComSaldoPositivo = Model.Count(p => (p.BancoHoras?.Saldo ?? 0) > 0);
+    var colabsComSaldoNegativo = Model.Count(p => (p.BancoHoras?.Saldo ?? 0) < 0);
+}
+
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">👥 TOTAL COLABORADORES</div>
+        <div style="font-size:26px;font-weight:700;color:#111827;">@totalColabs</div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">⏱️ SALDO TOTAL DA EMPRESA</div>
+        <div style="font-size:26px;font-weight:700;color:@(totalSaldo >= 0 ? "#16a34a" : "#dc2626");">
+            @(totalSaldo >= 0 ? "+" : "")@totalSaldo.ToString("F2")h
+        </div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">⚡ SALDO POSITIVO</div>
+        <div style="font-size:26px;font-weight:700;color:#16a34a;">@colabsComSaldoPositivo</div>
+    </div>
+    <div class="card" style="margin:0;padding:20px;">
+        <div style="font-size:12px;color:#6b7280;font-weight:700;margin-bottom:6px;">⚠️ SALDO NEGATIVO</div>
+        <div style="font-size:26px;font-weight:700;color:#dc2626;">@colabsComSaldoNegativo</div>
+    </div>
+</div>
+
+<!-- TABELA DE COLABORADORES -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-header-icon">📊</span>
+        <span class="card-header-title">Banco de horas individual</span>
+    </div>
+    @if (Model.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>Horas Normais</th>
+                    <th>Horas Extras</th>
+                    <th>Saldo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    var iniciais = string.Join("", p.Nome.Split(' ').Take(2).Select(n => n[0])).ToUpper();
+                    var saldo = p.BancoHoras?.Saldo ?? 0;
+                    var horasNormais = p.BancoHoras?.HorasNormais ?? 0;
+                    var horasExtras = p.BancoHoras?.HorasExtras ?? 0;
+                    var corSaldo = saldo > 0 ? "#16a34a" : (saldo < 0 ? "#dc2626" : "#6b7280");
+                    var sinalSaldo = saldo > 0 ? "+" : "";
+                    var cargoBadge = p.Cargo.ToString() == "CLT" ? "badge-blue" : "badge-gray";
+                    var cargoLabel = p.Cargo.ToString() == "Estagiario" ? "Estagiário" : p.Cargo.ToString();
+
+                    <tr>
+                        <td>
+                            <div class="colab-cell">
+                                <div class="colab-avatar">@iniciais</div>
+                                <div>
+                                    <div class="colab-nome">@p.Nome</div>
+                                    <div class="colab-login">@p.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge @cargoBadge">@cargoLabel</span></td>
+                        <td>@p.Setor</td>
+                        <td>@horasNormais.ToString("F2")h</td>
+                        <td style="color:#f59e0b;font-weight:600;">@horasExtras.ToString("F2")h</td>
+                        <td style="color:@corSaldo;font-weight:700;font-size:14px;">@sinalSaldo@saldo.ToString("F2")h</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>Nenhum colaborador cadastrado ainda.</p>
+        </div>
+    }
+</div>

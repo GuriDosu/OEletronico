@@ -1,0 +1,66 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Registrar Atestado";
+    var colaboradores = ViewBag.Colaboradores as List<OEletronico.Models.Pessoa> ?? new List<OEletronico.Models.Pessoa>();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">📋 Registrar Atestado</h1>
+        <p class="page-sub">Registre dias de atestado médico para os colaboradores</p>
+    </div>
+    <a asp-action="Admin" class="btn btn-outline">← Voltar</a>
+</div>
+
+<div class="form-layout">
+    <form asp-action="RegistrarAtestado" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="card form-card">
+            <div class="card-header">
+                <span class="card-header-icon">🏥</span>
+                <span class="card-header-title">Dados do atestado</span>
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="field-group full">
+                        <label>Colaborador <span class="required">*</span></label>
+                        <select name="PessoaId" required>
+                            <option value="0">Selecione um colaborador...</option>
+                            @foreach (var p in colaboradores)
+                            {
+                                <option value="@p.Id">
+                                    @p.Nome — @(p.Cargo.ToString() == "Estagiario" ? "Estagiário" : "CLT") (@p.Setor)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Data do atestado <span class="required">*</span></label>
+                        <input type="date" name="DataAtestado" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <div class="field-group full">
+                        <label>Observação / Motivo</label>
+                        <input type="text" name="Observacao" placeholder="Ex.: Atestado médico — consulta cardiológica" />
+                    </div>
+                </div>
+
+                <div class="info-box" style="background:#fef3c7;color:#92400e;">
+                    <span style="font-size:18px;">ℹ</span>
+                    <div>
+                        <strong>Como funciona:</strong> O dia marcado contará como <strong>jornada completa</strong>
+                        (8h para CLT, 6h para Estagiário) e o colaborador <strong>não perderá saldo</strong>
+                        por esta falta justificada.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a asp-action="Admin" class="btn btn-outline">Cancelar</a>
+            <button type="submit" class="btn btn-primary">✓ Registrar atestado</button>
+        </div>
+    </form>
+</div>
