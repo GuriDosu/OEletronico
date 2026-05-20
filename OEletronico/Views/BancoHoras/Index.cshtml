@@ -3,9 +3,16 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Meu Banco de Horas";
     var pontosMes = ViewBag.PontosMes as List<OEletronico.Models.RegistroPonto> ?? new List<OEletronico.Models.RegistroPonto>();
-    var totalDiasTrabalhados = pontosMes.Count(p => p.HoraSaida.HasValue);
+    var totalDiasTrabalhados = pontosMes.Count(p => p.HoraSaida.HasValue || p.EhAtestado);
     var corSaldo = Model.Saldo > 0 ? "#16a34a" : (Model.Saldo < 0 ? "#dc2626" : "#6b7280");
     var sinalSaldo = Model.Saldo > 0 ? "+" : "";
+    var userCargo = Context.Session.GetString("UserCargo") ?? "";
+
+    // Define jornada por cargo
+    var jornadaHoras = userCargo == "Estagiario" ? 6.0 : 8.0;
+    var almocoHoras = userCargo == "Estagiario" ? 0.0 : 1.0;
+    var almocoTexto = userCargo == "Estagiario" ? "Sem intervalo" : "1h descontada";
+    var cargoLabel = userCargo == "Estagiario" ? "Estagiário" : "CLT";
 }
 
 <div class="page-header">
@@ -40,9 +47,10 @@
     <div style="display:flex;align-items:flex-start;gap:12px;">
         <span style="font-size:24px;">ℹ</span>
         <div style="font-size:13px;color:#1e40af;">
-            <strong>Como funciona o cálculo:</strong> Jornada padrão de 8h/dia (descontado 1h de almoço).
-            Horas trabalhadas acima de 8h vão para <strong>horas extras</strong>.
-            Horas abaixo de 8h reduzem seu <strong>saldo</strong>.
+            <strong>Como funciona seu cálculo (@cargoLabel):</strong>
+            Jornada padrão de <strong>@jornadaHoras h/dia</strong> (@almocoTexto).
+            Horas trabalhadas acima da jornada vão para <strong>horas extras</strong>.
+            Horas abaixo reduzem seu <strong>saldo</strong>.
         </div>
     </div>
 </div>
@@ -71,20 +79,41 @@
                     string liquido = "--";
                     string saldoDia = "--";
                     string corSaldoDia = "#6b7280";
+                    string entrada = "--:--";
+                    string saida = "--:--";
 
-                    if (p.HoraSaida.HasValue)
+                    if (p.EhAtestado)
                     {
-                        var horas = (p.HoraSaida.Value - p.HoraEntrada).TotalHours - 1.0;
+                        // ATESTADO: jornada cumprida, saldo zero
+                        liquido = $"{jornadaHoras:F2}h";
+                        saldoDia = "🏥 Atestado";
+                        corSaldoDia = "#2563eb";
+                        entrada = "--:--";
+                        saida = "--:--";
+                    }
+                    else if (p.HoraSaida.HasValue)
+                    {
+                        entrada = p.HoraEntrada.ToString(@"hh\:mm");
+                        saida = p.HoraSaida.Value.ToString(@"hh\:mm");
+                        var horas = (p.HoraSaida.Value - p.HoraEntrada).TotalHours - almocoHoras;
+                        if (horas < 0) horas = 0;
                         liquido = $"{horas:F2}h";
-                        var saldoCalc = horas - 8.0;
+                        var saldoCalc = horas - jornadaHoras;
                         saldoDia = (saldoCalc > 0 ? "+" : "") + $"{saldoCalc:F2}h";
                         corSaldoDia = saldoCalc > 0 ? "#16a34a" : (saldoCalc < 0 ? "#dc2626" : "#6b7280");
                     }
+                    else
+                    {
+                        entrada = p.HoraEntrada.ToString(@"hh\:mm");
+                        saida = "--:--";
+                        liquido = "Em aberto";
+                        saldoDia = "--";
+                    }
 
-                    <tr>
+                    <tr style="@(p.EhAtestado ? "background:#dbeafe;" : "")">
                         <td><strong>@p.Data.ToLocalTime().ToString("dd/MM/yyyy")</strong></td>
-                        <td>@p.HoraEntrada.ToString(@"hh\:mm")</td>
-                        <td>@(p.HoraSaida.HasValue ? p.HoraSaida.Value.ToString(@"hh\:mm") : "--:--")</td>
+                        <td>@entrada</td>
+                        <td>@saida</td>
                         <td>@liquido</td>
                         <td style="color:@corSaldoDia;font-weight:700;">@saldoDia</td>
                     </tr>

@@ -98,7 +98,6 @@ namespace OEletronico.Controllers
             TempData["Sucesso"] = $"✓ Entrada registrada às {agora.ToLocalTime():HH:mm}";
             return RedirectToAction("Index");
         }
-
         // ─── BATER SAÍDA ────────────────────────────────────────────
         // ─── BATER SAÍDA ────────────────────────────────────────────
         [HttpPost]
@@ -114,7 +113,7 @@ namespace OEletronico.Controllers
             // Busca o ponto de hoje COM a pessoa pra saber o cargo
             var ponto = await _context.RegistrosPonto
                 .Include(r => r.Pessoa)
-                .FirstOrDefaultAsync(r => r.PessoaId == pessoaId && r.Data.Date == hoje);
+                .FirstOrDefaultAsync(r => r.PessoaId == pessoaId && r.Data.Date == hoje && !r.EhAtestado);
 
             if (ponto == null)
             {
@@ -138,18 +137,21 @@ namespace OEletronico.Controllers
 
             if (ponto.Pessoa.Cargo == CargoEnum.Estagiario)
             {
-                jornadaPadrao = 6.0;   // Estagiário: 6h
-                horasAlmoco = 0.0;     // Sem almoço descontado
+                jornadaPadrao = 6.0;
+                horasAlmoco = 0.0;
             }
             else // CLT
             {
-                jornadaPadrao = 8.0;   // CLT: 8h
-                horasAlmoco = 1.0;     // 1h de almoço descontada
+                jornadaPadrao = 8.0;
+                horasAlmoco = 1.0;
             }
 
             // Calcula horas líquidas
             var horasTrabalhadas = (ponto.HoraSaida.Value - ponto.HoraEntrada).TotalHours;
             var horasLiquidas = horasTrabalhadas - horasAlmoco;
+
+            // Garante que não fique negativo
+            if (horasLiquidas < 0) horasLiquidas = 0;
 
             // Atualiza banco de horas
             var bancoHoras = await _context.BancosHoras
@@ -167,20 +169,27 @@ namespace OEletronico.Controllers
                 _context.BancosHoras.Add(bancoHoras);
             }
 
-            if (horasLiquidas > 0)
+            // ⭐ LÓGICA CORRIGIDA
+            // HorasNormais: soma o que trabalhou (limitado à jornada)
+            bancoHoras.HorasNormais += Math.Min(horasLiquidas, jornadaPadrao);
+
+            // HorasExtras: só se passou da jornada
+            double horasExtrasDoDia = 0;
+            if (horasLiquidas > jornadaPadrao)
             {
-                bancoHoras.HorasNormais += Math.Min(horasLiquidas, jornadaPadrao);
-
-                if (horasLiquidas > jornadaPadrao)
-                    bancoHoras.HorasExtras += (horasLiquidas - jornadaPadrao);
-
-                bancoHoras.Saldo += (horasLiquidas - jornadaPadrao);
+                horasExtrasDoDia = horasLiquidas - jornadaPadrao;
+                bancoHoras.HorasExtras += horasExtrasDoDia;
             }
+
+            // Saldo = diferença entre trabalhado e jornada (positivo OU negativo)
+            var saldoDoDia = horasLiquidas - jornadaPadrao;
+            bancoHoras.Saldo += saldoDoDia;
 
             await _context.SaveChangesAsync();
 
             var cargoLabel = ponto.Pessoa.Cargo == CargoEnum.Estagiario ? "Estagiário (6h)" : "CLT (8h)";
-            TempData["Sucesso"] = $"✓ Saída registrada às {agora.ToLocalTime():HH:mm} | Trabalhou {horasLiquidas:F2}h líquidas ({cargoLabel})";
+            var saldoTexto = saldoDoDia >= 0 ? $"+{saldoDoDia:F2}h" : $"{saldoDoDia:F2}h";
+            TempData["Sucesso"] = $"✓ Saída às {agora.ToLocalTime():HH:mm} | {horasLiquidas:F2}h líquidas | Saldo do dia: {saldoTexto} ({cargoLabel})";
             return RedirectToAction("Index");
         }
     }

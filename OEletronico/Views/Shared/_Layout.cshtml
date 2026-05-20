@@ -27,13 +27,12 @@
             </div>
 
             <nav class="sidebar-nav">
-                <!-- TODOS veem o Perfil -->
+
+                <!-- ─── GERAL (TODOS) ─── -->
                 <div class="nav-section">Geral</div>
                 <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil">
                     <span class="nav-icon">👤</span> Meu Perfil
                 </a>
-
-                <!-- TODOS podem consultar Produtos -->
                 <a class="nav-item" asp-controller="Produto" asp-action="Index">
                     <span class="nav-icon">📦</span> Produtos
                 </a>
@@ -43,7 +42,7 @@
 
                 @if (Context.Session.GetString("UserCargo") != "Admin")
                 {
-                    
+                    <!-- ─── PONTO (SÓ COLABORADOR) ─── -->
                     <div class="nav-section">Ponto</div>
                     <a class="nav-item" asp-controller="RegistroPonto" asp-action="Index">
                         <span class="nav-icon">🕐</span> Bater Ponto
@@ -53,14 +52,9 @@
                     </a>
                 }
 
-                <!-- TODOS podem usar Movimentação -->
-                <a class="nav-item" asp-controller="Movimentacao" asp-action="Index">
-                    <span class="nav-icon">🗃️</span> Movimentação
-                </a>
-
                 @if (Context.Session.GetString("UserCargo") == "Admin")
                 {
-                    
+                    <!-- ─── ADMINISTRAÇÃO (SÓ ADMIN) ─── -->
                     <div class="nav-section">Administração</div>
                     <a class="nav-item" asp-controller="Pessoa" asp-action="Index">
                         <span class="nav-icon">👥</span> Colaboradores
@@ -69,6 +63,7 @@
                         <span class="nav-icon">📊</span> Banco de Horas
                     </a>
                 }
+
             </nav>
 
             <div class="sidebar-footer">
