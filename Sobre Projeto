@@ -1,0 +1,19 @@
+O Eletrônico
+
+Sistema web de gestão empresarial desenvolvido para a **Técnica Olinda**, centralizando controle de estoque, registro de ponto e indicadores gerenciais em uma única plataforma.
+O sistema permite o cadastro de produtos e LEDs com controle por prateleira numerada, vinculação de colaboradores a contratos via CNPJ, e o registro digital de ponto com diferenciação automática de jornada (CLT/Estagiário). Administradores contam com um Dashboard exclusivo com indicadores em tempo real, além de exportação de relatórios em PDF e planilhas Excel multi-abas.
+Desenvolvido em **ASP.NET Core MVC 8.0** com banco de dados **PostgreSQL**, autenticação via **JWT** e senhas protegidas com **BCrypt**.
+
+Funcionalidades
+
+- 🔐 Autenticação segura com JWT e criptografia BCrypt
+- 🏢 Gestão de CNPJs e vinculação de colaboradores a contratos
+- 📦 Controle de estoque por prateleira, com separação entre Produtos e LEDs
+- 🕐 Registro de ponto digital com cálculo automático de jornada (CLT/Estagiário)
+- 💼 Banco de horas individual e consolidado
+- 📊 Dashboard administrativo com indicadores em tempo real
+- 📄 Geração de relatórios em PDF (QuestPDF) e Excel multi-abas (ClosedXML)
+
+## 🧰 Tecnologias
+
+`C#` `ASP.NET Core MVC 8.0` `Entity Framework Core` `PostgreSQL` `JWT` `BCrypt` `QuestPDF` `ClosedXML` `Chart.js`
