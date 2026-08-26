@@ -38,7 +38,7 @@ namespace OEletronico.Controllers
             }
 
             var pessoaId = int.Parse(HttpContext.Session.GetString("UserPessoaId")!);
-            var hoje = DateTime.UtcNow.Date;
+            var hoje = DateTime.Now.Date;
 
             // Busca o registro de HOJE (se existir)
             var pontoHoje = await _context.RegistrosPonto
@@ -48,7 +48,7 @@ namespace OEletronico.Controllers
                 .FirstOrDefaultAsync();
 
             // Histórico dos últimos 30 dias
-            var dataLimite = DateTime.UtcNow.AddDays(-30);
+            var dataLimite = DateTime.Now.AddDays(-30);
             var historico = await _context.RegistrosPonto
                 .Where(r => r.PessoaId == pessoaId && r.Data >= dataLimite)
                 .OrderByDescending(r => r.Data)
@@ -70,7 +70,7 @@ namespace OEletronico.Controllers
             if (EhAdmin()) return Forbid();
 
             var pessoaId = int.Parse(HttpContext.Session.GetString("UserPessoaId")!);
-            var hoje = DateTime.UtcNow.Date;
+            var hoje = DateTime.Now.Date;
 
             // Verifica se já bateu ponto hoje
             var pontoHoje = await _context.RegistrosPonto
@@ -82,11 +82,11 @@ namespace OEletronico.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Registra a entrada
-            var agora = DateTime.UtcNow;
+            // Registra a entrada (horário local do Brasil)
+            var agora = DateTime.Now;
             var ponto = new RegistroPonto
             {
-                Data = DateTime.SpecifyKind(hoje, DateTimeKind.Utc),
+                Data = hoje,
                 HoraEntrada = agora.TimeOfDay,
                 HoraSaida = null,
                 PessoaId = pessoaId
@@ -95,10 +95,10 @@ namespace OEletronico.Controllers
             _context.RegistrosPonto.Add(ponto);
             await _context.SaveChangesAsync();
 
-            TempData["Sucesso"] = $"✓ Entrada registrada às {agora.ToLocalTime():HH:mm}";
+            TempData["Sucesso"] = $"✓ Entrada registrada às {agora:HH:mm}";
             return RedirectToAction("Index");
         }
-        // ─── BATER SAÍDA ────────────────────────────────────────────
+
         // ─── BATER SAÍDA ────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -108,7 +108,7 @@ namespace OEletronico.Controllers
             if (EhAdmin()) return Forbid();
 
             var pessoaId = int.Parse(HttpContext.Session.GetString("UserPessoaId")!);
-            var hoje = DateTime.UtcNow.Date;
+            var hoje = DateTime.Now.Date;
 
             // Busca o ponto de hoje COM a pessoa pra saber o cargo
             var ponto = await _context.RegistrosPonto
@@ -127,8 +127,8 @@ namespace OEletronico.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Registra a saída
-            var agora = DateTime.UtcNow;
+            // Registra a saída (horário local do Brasil)
+            var agora = DateTime.Now;
             ponto.HoraSaida = agora.TimeOfDay;
 
             // ⭐ DEFINIR JORNADA E ALMOÇO POR CARGO
@@ -169,7 +169,6 @@ namespace OEletronico.Controllers
                 _context.BancosHoras.Add(bancoHoras);
             }
 
-            // ⭐ LÓGICA CORRIGIDA
             // HorasNormais: soma o que trabalhou (limitado à jornada)
             bancoHoras.HorasNormais += Math.Min(horasLiquidas, jornadaPadrao);
 
@@ -189,7 +188,7 @@ namespace OEletronico.Controllers
 
             var cargoLabel = ponto.Pessoa.Cargo == CargoEnum.Estagiario ? "Estagiário (6h)" : "CLT (8h)";
             var saldoTexto = saldoDoDia >= 0 ? $"+{saldoDoDia:F2}h" : $"{saldoDoDia:F2}h";
-            TempData["Sucesso"] = $"✓ Saída às {agora.ToLocalTime():HH:mm} | {horasLiquidas:F2}h líquidas | Saldo do dia: {saldoTexto} ({cargoLabel})";
+            TempData["Sucesso"] = $"✓ Saída às {agora:HH:mm} | {horasLiquidas:F2}h líquidas | Saldo do dia: {saldoTexto} ({cargoLabel})";
             return RedirectToAction("Index");
         }
     }

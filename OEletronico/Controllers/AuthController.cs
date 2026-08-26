@@ -108,12 +108,5 @@ namespace OEletronico.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        // 🔧 MÉTODO TEMPORÁRIO — APAGAR DEPOIS DE USAR
-        [HttpGet]
-        public IActionResult GerarHash(string senha)
-        {
-            var hash = BCrypt.Net.BCrypt.HashPassword(senha);
-            return Content(hash);
-        }
     }
 }

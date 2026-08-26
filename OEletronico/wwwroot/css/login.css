@@ -241,3 +241,15 @@ body.login-body {
     color: var(--red);
     margin-bottom: 20px;
 }
+
+/* ─── REMOVE OLHO DUPLICADO DO NAVEGADOR (Edge/Chrome) ─── */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-strong-password-auto-fill-button {
+    display: none !important;
+    visibility: hidden !important;
+}

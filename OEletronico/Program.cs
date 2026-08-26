@@ -7,11 +7,15 @@ using OEletronico.Models.Data;
 
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
+
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -59,7 +63,7 @@ using (var scope = app.Services.CreateScope())
             Email = "admin@oeletronico.com",
             Cargo = OEletronico.Models.Enums.CargoEnum.Admin,
             Setor = "Administração",
-            DataAdmissao = DateTime.SpecifyKind(new DateTime(2024, 1, 1), DateTimeKind.Utc)
+            DataAdmissao = new DateTime(2024, 1, 1)
         };
         context.Pessoas.Add(pessoaAdmin);
         context.SaveChanges();
