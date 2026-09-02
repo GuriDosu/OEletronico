@@ -1,0 +1,313 @@
+﻿@model IEnumerable<OEletronico.Models.Produto>
+
+@{
+    ViewData["Title"] = "Dashboard Gerencial";
+}
+
+<!-- Estilos internos para dar o aspecto "Hub Moderno" -->
+<style>
+    .hub-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease-in-out;
+        background-color: #ffffff;
+    }
+
+        .hub-card:hover {
+            transform: translateY(-3px);
+        }
+
+    .hub-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 320px; /* Trava a altura para não explodir na tela */
+        width: 100%;
+    }
+
+    .text-sm {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+
+<div class="container-fluid py-4" style="background-color: #f8f9fa; min-height: 100vh;">
+    
+    <!-- CABEÇALHO COM BOTÕES DE FILTRO -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0 fw-bold" style="color: #2c3e50;">Painel de Controle</h2>
+            <span class="text-sm">Faturamento e indicadores de movimentação</span>
+        </div>
+        
+        <!-- Grupo de Botões de Filtro de Tempo -->
+        <div class="btn-group shadow-sm" role="group">
+            <a href="@Url.Action("Index", new { filtro = "dia" })"
+                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "dia" ? "active text-dark fw-bold" : "")">
+                Hoje
+            </a>
+            <a href="@Url.Action("Index", new { filtro = "semana" })"
+                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "semana" ? "active text-dark fw-bold" : "")">
+                Últimos 7 Dias
+            </a>
+            <a href="@Url.Action("Index", new { filtro = "mes" })"
+                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "mes" ? "active text-dark fw-bold" : "")">
+                Este Mês
+            </a>
+            <a href="@Url.Action("Index", new { filtro = "tudo" })"
+                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "tudo" ? "active text-dark fw-bold" : "")">
+                Total
+            </a>
+        </div>
+    </div>
+
+    <!-- 1ª LINHA: Cards Principais (Lado a Lado) -->
+    <div class="row g-3 mb-4">
+        <!-- Dinheiro de Entradas -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card hub-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="hub-icon-box bg-success text-white me-3">
+                        💰
+                    </div>
+                    <div>
+                        <div class="text-sm fw-bold text-uppercase">Entrada Financeira</div>
+                        <h4 class="mb-0 fw-bold text-dark">R$ @(((decimal)ViewBag.DinheiroEntrada).ToString("N2"))</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patrimônio em Estoque -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card hub-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="hub-icon-box bg-primary text-white me-3">
+                        📦
+                    </div>
+                    <div>
+                        <div class="text-sm fw-bold text-uppercase">Patrimônio (Estoque)</div>
+                        <h4 class="mb-0 fw-bold text-dark">R$ @(((decimal)ViewBag.ValorPatrimonioEstoque).ToString("N2"))</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entradas (Itens) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card hub-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="hub-icon-box bg-info text-white me-3">
+                        ⬇️
+                    </div>
+                    <div>
+                        <div class="text-sm fw-bold text-uppercase">Total Entradas</div>
+                        <h4 class="mb-0 fw-bold text-dark">@ViewBag.TotalEntradas <span class="fs-6 text-muted">un</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saídas (Itens) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card hub-card h-100 p-3">
+                <div class="d-flex align-items-center">
+                    <div class="hub-icon-box bg-warning text-dark me-3">
+                        ⬆️
+                    </div>
+                    <div>
+                        <div class="text-sm fw-bold text-uppercase">Total Saídas</div>
+                        <h4 class="mb-0 fw-bold text-dark">@ViewBag.TotalSaidas <span class="fs-6 text-muted">un</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2ª LINHA: Gráficos (Controlados) -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card hub-card h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h6 class="fw-bold mb-0">Fluxo de Movimentação (Entradas x Saídas)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="movimentacaoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card hub-card h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h6 class="fw-bold mb-0">Proporção do Fluxo</h6>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="pizzaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3ª LINHA: Tabelas (Lado a Lado) -->
+    <div class="row g-3">
+        <!-- Tabela de Alerta -->
+        <div class="col-lg-6">
+            <div class="card hub-card h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-2">
+                    <h6 class="fw-bold text-danger mb-0">⚠️ Alerta: Estoque Baixo (≤ 5)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-sm">
+                                <tr>
+                                    <th class="ps-4">Código</th>
+                                    <th>Produto</th>
+                                    <th>Qtd</th>
+                                    <th class="pe-4">Preço</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm border-top-0">
+                                @if (Model != null && Model.Any())
+                                {
+                                    @foreach (var produto in Model)
+                                    {
+                                        <tr>
+                                            <td class="ps-4 text-muted">@produto.Codigo</td>
+                                            <td class="fw-bold">@produto.Nome</td>
+                                            <td><span class="badge bg-danger rounded-pill">@produto.Quantidade</span></td>
+                                            <td class="pe-4">R$ @produto.Preco.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">Estoque regular. Nenhum alerta.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Movimentações -->
+        <div class="col-lg-6">
+            <div class="card hub-card h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-2">
+                    <h6 class="fw-bold text-primary mb-0">📋 Últimas Movimentações</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-sm">
+                                <tr>
+                                    <th class="ps-4">Tipo</th>
+                                    <th>Produto</th>
+                                    <th class="pe-4 text-end">Quantidade</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm border-top-0">
+                                @if (ViewBag.UltimasMovimentacoes != null && ((List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes).Any())
+                                {
+                                    @foreach (var mov in (List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                @if (mov.Tipo == "Entrada")
+                                                {
+                                                    <span class="badge bg-success-subtle text-success border border-success rounded-pill px-2">Entrada</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning rounded-pill px-2">Saída</span>
+                                                }
+                                            </td>
+                                            <td class="fw-bold">@(mov.Produto?.Nome ?? "Produto Excluído")</td>
+                                            <td class="pe-4 text-end">@mov.Quantidade</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">Nenhuma movimentação recente.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Configuração Global para os gráficos respeitarem o tamanho da div
+        Chart.defaults.maintainAspectRatio = false;
+
+        // Gráfico de Barras
+        const ctxBar = document.getElementById('movimentacaoChart').getContext('2d');
+        new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+        labels: ['Entradas', 'Saídas'],
+        datasets: [{
+        label: 'Volume de Itens',
+        data: [@ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
+        backgroundColor: ['rgba(40, 167, 69, 0.8)', 'rgba(255, 193, 7, 0.8)'],
+        borderRadius: 6,
+        barPercentage: 0.5
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+        x: { grid: { display: false } }
+        }
+        }
+        });
+
+        // Gráfico de Pizza (Doughnut)
+        const ctxPizza = document.getElementById('pizzaChart').getContext('2d');
+        new Chart(ctxPizza, {
+        type: 'doughnut',
+        data: {
+        labels: ['Entradas', 'Saídas'],
+        datasets: [{
+        data: [@ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
+        backgroundColor: ['#28a745', '#ffc107'],
+        borderWidth: 0
+        }]
+        },
+        options: {
+        responsive: true,
+        cutout: '75%',
+        plugins: {
+        legend: { position: 'bottom' }
+        }
+        }
+        });
+    </script>
+}
