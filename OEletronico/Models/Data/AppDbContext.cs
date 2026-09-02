@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using OEletronico.Models;
 using OEletronico.Models.Enums;
 
 namespace OEletronico.Models.Data
@@ -7,7 +9,7 @@ namespace OEletronico.Models.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // Tabelas do banco
+        // Tabelas originais do sistema
         public DbSet<Pessoa> Pessoas { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Produto> Produtos { get; set; }
@@ -25,7 +27,7 @@ namespace OEletronico.Models.Data
             modelBuilder.Entity<Pessoa>().HasIndex(p => p.Email).IsUnique();
             modelBuilder.Entity<Produto>().HasIndex(p => p.Codigo).IsUnique();
 
-            // Relacionamentos 1:1
+            // Relacionamentos 1:1 originais
             modelBuilder.Entity<Pessoa>()
                 .HasOne(p => p.Usuario)
                 .WithOne(u => u.Pessoa)
