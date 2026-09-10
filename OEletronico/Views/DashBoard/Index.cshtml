@@ -1,258 +1,232 @@
 ﻿@model IEnumerable<OEletronico.Models.Produto>
 
 @{
-    ViewData["Title"] = "Dashboard Gerencial";
+    ViewData["Title"] = "Dashboard";
 }
 
-<!-- Estilos internos para dar o aspecto "Hub Moderno" -->
 <style>
-    .hub-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        transition: transform 0.2s ease-in-out;
-        background-color: #ffffff;
+    .sb-dashboard {
+        background-color: #f8f9fc;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+        font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
-        .hub-card:hover {
-            transform: translateY(-3px);
-        }
-
-    .hub-icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
+    /* Cards com a borda colorida clássica do SB Admin 2 */
+    .sb-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        padding: 1.25rem;
+        height: 110px;
+        position: relative;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        font-size: 1.5rem;
+    }
+
+    .border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+    .border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+    .border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+    .border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+
+    .sb-card-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+    }
+
+    .sb-card-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #5a5c69;
+        margin-bottom: 0;
+    }
+
+    /* Cards de Seção (Gráficos e Tabelas) */
+    .sb-section-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 0.35rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 1.5rem;
+    }
+
+    .sb-section-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+        padding: 0.75rem 1.25rem;
+        font-weight: 700;
+        color: #4e73df;
+        font-size: 0.95rem;
+        border-top-left-radius: 0.35rem;
+        border-top-right-radius: 0.35rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .chart-container {
         position: relative;
-        height: 320px; /* Trava a altura para não explodir na tela */
+        height: 290px;
         width: 100%;
     }
 
-    .text-sm {
+    .status-list-item {
+        display: flex;
+        justify-content: space-between;
         font-size: 0.85rem;
-        color: #6c757d;
+        color: #6e707e;
+        margin-bottom: 6px;
+        font-weight: 600;
     }
 </style>
 
-<div class="container-fluid py-4" style="background-color: #f8f9fa; min-height: 100vh;">
+<div class="container-fluid sb-dashboard pt-4">
     
-    <!-- CABEÇALHO COM BOTÕES DE FILTRO -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-0 fw-bold" style="color: #2c3e50;">Painel de Controle</h2>
-            <span class="text-sm">Faturamento e indicadores de movimentação</span>
-        </div>
+    <!-- CABEÇALHO E FILTROS -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800 fw-bold" style="color: #5a5c69 !important;">Dashboard</h1>
         
-        <!-- Grupo de Botões de Filtro de Tempo -->
-        <div class="btn-group shadow-sm" role="group">
-            <a href="@Url.Action("Index", new { filtro = "dia" })"
-                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "dia" ? "active text-dark fw-bold" : "")">
-                Hoje
-            </a>
-            <a href="@Url.Action("Index", new { filtro = "semana" })"
-                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "semana" ? "active text-dark fw-bold" : "")">
-                Últimos 7 Dias
-            </a>
-            <a href="@Url.Action("Index", new { filtro = "mes" })"
-                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "mes" ? "active text-dark fw-bold" : "")">
-                Este Mês
-            </a>
-            <a href="@Url.Action("Index", new { filtro = "tudo" })"
-                   class="btn btn-sm btn-outline-secondary @(ViewBag.FiltroAtual == "tudo" ? "active text-dark fw-bold" : "")">
-                Total
-            </a>
+        <!-- Botões de Filtro Estilo SB Admin -->
+        <div class="btn-group shadow-sm bg-white rounded" role="group">
+            <a href="@Url.Action("Index", new { filtro = "dia" })" class="btn btn-sm @(ViewBag.FiltroAtual == "dia" ? "btn-primary" : "btn-light text-secondary")">Hoje</a>
+            <a href="@Url.Action("Index", new { filtro = "semana" })" class="btn btn-sm @(ViewBag.FiltroAtual == "semana" ? "btn-primary" : "btn-light text-secondary")">7 Dias</a>
+            <a href="@Url.Action("Index", new { filtro = "mes" })" class="btn btn-sm @(ViewBag.FiltroAtual == "mes" ? "btn-primary" : "btn-light text-secondary")">Mês</a>
+            <a href="@Url.Action("Index", new { filtro = "tudo" })" class="btn btn-sm @(ViewBag.FiltroAtual == "tudo" ? "btn-primary" : "btn-light text-secondary")">Total</a>
         </div>
     </div>
 
-    <!-- 1ª LINHA: Cards Principais (Lado a Lado) -->
-    <div class="row g-3 mb-4">
-        <!-- Dinheiro de Entradas -->
+    <!-- 1ª LINHA: 4 CARDS DE INDICADORES (Lado a lado, travados) -->
+    <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card hub-card h-100 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="hub-icon-box bg-success text-white me-3">
-                        💰
-                    </div>
-                    <div>
-                        <div class="text-sm fw-bold text-uppercase">Entrada Financeira</div>
-                        <h4 class="mb-0 fw-bold text-dark">R$ @(((decimal)ViewBag.DinheiroEntrada).ToString("N2"))</h4>
-                    </div>
-                </div>
+            <div class="sb-card border-left-success">
+                <div class="sb-card-title text-success">Entrada Financeira</div>
+                <div class="sb-card-value">R$ @(((decimal)ViewBag.DinheiroEntrada).ToString("N2"))</div>
             </div>
         </div>
 
-        <!-- Patrimônio em Estoque -->
         <div class="col-xl-3 col-md-6">
-            <div class="card hub-card h-100 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="hub-icon-box bg-primary text-white me-3">
-                        📦
-                    </div>
-                    <div>
-                        <div class="text-sm fw-bold text-uppercase">Patrimônio (Estoque)</div>
-                        <h4 class="mb-0 fw-bold text-dark">R$ @(((decimal)ViewBag.ValorPatrimonioEstoque).ToString("N2"))</h4>
-                    </div>
-                </div>
+            <div class="sb-card border-left-primary">
+                <div class="sb-card-title text-primary">Patrimônio Estoque</div>
+                <div class="sb-card-value">R$ @(((decimal)ViewBag.ValorPatrimonioEstoque).ToString("N2"))</div>
             </div>
         </div>
 
-        <!-- Entradas (Itens) -->
         <div class="col-xl-3 col-md-6">
-            <div class="card hub-card h-100 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="hub-icon-box bg-info text-white me-3">
-                        ⬇️
-                    </div>
-                    <div>
-                        <div class="text-sm fw-bold text-uppercase">Total Entradas</div>
-                        <h4 class="mb-0 fw-bold text-dark">@ViewBag.TotalEntradas <span class="fs-6 text-muted">un</span></h4>
-                    </div>
-                </div>
+            <div class="sb-card border-left-info">
+                <div class="sb-card-title text-info">Total Entradas (Itens)</div>
+                <div class="sb-card-value">@ViewBag.TotalEntradas un</div>
             </div>
         </div>
 
-        <!-- Saídas (Itens) -->
         <div class="col-xl-3 col-md-6">
-            <div class="card hub-card h-100 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="hub-icon-box bg-warning text-dark me-3">
-                        ⬆️
-                    </div>
-                    <div>
-                        <div class="text-sm fw-bold text-uppercase">Total Saídas</div>
-                        <h4 class="mb-0 fw-bold text-dark">@ViewBag.TotalSaidas <span class="fs-6 text-muted">un</span></h4>
-                    </div>
-                </div>
+            <div class="sb-card border-left-warning">
+                <div class="sb-card-title text-warning">Total Saídas (Itens)</div>
+                <div class="sb-card-value">@ViewBag.TotalSaidas un</div>
             </div>
         </div>
     </div>
 
-    <!-- 2ª LINHA: Gráficos (Controlados) -->
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card hub-card h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-0">
-                    <h6 class="fw-bold mb-0">Fluxo de Movimentação (Entradas x Saídas)</h6>
+    <!-- 2ª LINHA: GRÁFICO DE LINHA (Earnings Overview) + GRÁFICO DE ROSCA (Revenue Sources) -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8 col-lg-7">
+            <div class="sb-section-card">
+                <div class="sb-section-header">
+                    <span>Visão Geral de Movimentação</span>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="chart-container">
-                        <canvas id="movimentacaoChart"></canvas>
+                        <canvas id="earningsChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card hub-card h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-0">
-                    <h6 class="fw-bold mb-0">Proporção do Fluxo</h6>
+        <div class="col-xl-4 col-lg-5">
+            <div class="sb-section-card">
+                <div class="sb-section-header">
+                    <span>Fontes de Fluxo</span>
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <div class="chart-container" style="height: 250px;">
-                        <canvas id="pizzaChart"></canvas>
+                <div class="card-body p-3 d-flex justify-content-center align-items-center" style="height: 335px;">
+                    <div style="width: 100%; max-height: 270px;">
+                        <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3ª LINHA: Tabelas (Lado a Lado) -->
-    <div class="row g-3">
-        <!-- Tabela de Alerta -->
-        <div class="col-lg-6">
-            <div class="card hub-card h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-2">
-                    <h6 class="fw-bold text-danger mb-0">⚠️ Alerta: Estoque Baixo (≤ 5)</h6>
+    <!-- 3ª LINHA: BARRAS DE PROGRESSO (Projects) + TABELA RECENTE -->
+    <div class="row g-4">
+        <div class="col-xl-6 col-lg-6">
+            <div class="sb-section-card">
+                <div class="sb-section-header text-danger">
+                    <span>Alerta: Estoque Baixo (≤ 5)</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light text-sm">
-                                <tr>
-                                    <th class="ps-4">Código</th>
-                                    <th>Produto</th>
-                                    <th>Qtd</th>
-                                    <th class="pe-4">Preço</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm border-top-0">
-                                @if (Model != null && Model.Any())
-                                {
-                                    @foreach (var produto in Model)
-                                    {
-                                        <tr>
-                                            <td class="ps-4 text-muted">@produto.Codigo</td>
-                                            <td class="fw-bold">@produto.Nome</td>
-                                            <td><span class="badge bg-danger rounded-pill">@produto.Quantidade</span></td>
-                                            <td class="pe-4">R$ @produto.Preco.ToString("N2")</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center py-4 text-muted">Estoque regular. Nenhum alerta.</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card-body p-4" style="height: 280px; overflow-y: auto;">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var produto in Model)
+                        {
+                            int percent = produto.Quantidade * 20;
+                            <div class="mb-3">
+                                <div class="status-list-item">
+                                    <span>@produto.Nome</span>
+                                    <span class="text-danger fw-bold">@produto.Quantidade un</span>
+                                </div>
+                                <div class="progress" style="height: 8px; border-radius: 4px; background-color: #eaecf4;">
+                                    <div class="progress-bar bg-danger" style="width: @percent%;"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted mt-5">Nenhum produto crítico no momento.</div>
+                    }
                 </div>
             </div>
         </div>
 
-        <!-- Tabela de Movimentações -->
-        <div class="col-lg-6">
-            <div class="card hub-card h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-2">
-                    <h6 class="fw-bold text-primary mb-0">📋 Últimas Movimentações</h6>
+        <div class="col-xl-6 col-lg-6">
+            <div class="sb-section-card">
+                <div class="sb-section-header text-primary">
+                    <span>Últimas Movimentações</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light text-sm">
-                                <tr>
-                                    <th class="ps-4">Tipo</th>
-                                    <th>Produto</th>
-                                    <th class="pe-4 text-end">Quantidade</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm border-top-0">
-                                @if (ViewBag.UltimasMovimentacoes != null && ((List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes).Any())
-                                {
-                                    @foreach (var mov in (List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes)
-                                    {
-                                        <tr>
-                                            <td class="ps-4">
-                                                @if (mov.Tipo == "Entrada")
-                                                {
-                                                    <span class="badge bg-success-subtle text-success border border-success rounded-pill px-2">Entrada</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-warning-subtle text-warning border border-warning rounded-pill px-2">Saída</span>
-                                                }
-                                            </td>
-                                            <td class="fw-bold">@(mov.Produto?.Nome ?? "Produto Excluído")</td>
-                                            <td class="pe-4 text-end">@mov.Quantidade</td>
-                                        </tr>
-                                    }
-                                }
-                                else
+                <div class="card-body p-0" style="height: 280px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                        <thead class="table-light text-uppercase text-secondary" style="font-size: 0.75rem;">
+                            <tr>
+                                <th class="ps-4">Tipo</th>
+                                <th>Produto</th>
+                                <th class="pe-4 text-end">Qtd</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.UltimasMovimentacoes != null && ((List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes).Any())
+                            {
+                                @foreach (var mov in (List<OEletronico.Models.MovimentacaoEstoque>)ViewBag.UltimasMovimentacoes)
                                 {
                                     <tr>
-                                        <td colspan="3" class="text-center py-4 text-muted">Nenhuma movimentação recente.</td>
+                                        <td class="ps-4">
+                                            @if (mov.Tipo == "Entrada") { <span class="badge bg-success">Entrada</span> }
+                                            else { <span class="badge bg-warning text-dark">Saída</span> }
+                                        </td>
+                                        <td class="fw-bold text-dark">@(mov.Produto?.Nome ?? "Removido")</td>
+                                        <td class="pe-4 text-end text-muted">@mov.Quantidade un</td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Nenhuma movimentação.</td></tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -262,52 +236,59 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuração Global para os gráficos respeitarem o tamanho da div
         Chart.defaults.maintainAspectRatio = false;
+        Chart.defaults.font.family = "'Nunito', sans-serif";
+        Chart.defaults.color = '#858796';
 
-        // Gráfico de Barras
-        const ctxBar = document.getElementById('movimentacaoChart').getContext('2d');
-        new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-        labels: ['Entradas', 'Saídas'],
-        datasets: [{
-        label: 'Volume de Itens',
-        data: [@ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
-        backgroundColor: ['rgba(40, 167, 69, 0.8)', 'rgba(255, 193, 7, 0.8)'],
-        borderRadius: 6,
-        barPercentage: 0.5
-        }]
-        },
-        options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-        x: { grid: { display: false } }
-        }
-        }
+        // Gráfico de Linha (Estilo "Earnings Overview" do SB Admin)
+        const ctxLine = document.getElementById('earningsChart').getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['Início', 'Parcial', 'Atual'],
+                datasets: [{
+                    label: 'Volume',
+                    data: [0, @ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
+                    backgroundColor: 'rgba(78, 115, 232, 0.05)',
+                    borderColor: '#4e73df',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#4e73df',
+                    pointBorderColor: '#4e73df',
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#e3e6f0', borderDash: [2, 2] }, border: { display: false } },
+                    x: { grid: { display: false }, border: { display: false } }
+                }
+            }
         });
 
-        // Gráfico de Pizza (Doughnut)
-        const ctxPizza = document.getElementById('pizzaChart').getContext('2d');
-        new Chart(ctxPizza, {
-        type: 'doughnut',
-        data: {
-        labels: ['Entradas', 'Saídas'],
-        datasets: [{
-        data: [@ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
-        backgroundColor: ['#28a745', '#ffc107'],
-        borderWidth: 0
-        }]
-        },
-        options: {
-        responsive: true,
-        cutout: '75%',
-        plugins: {
-        legend: { position: 'bottom' }
-        }
-        }
+        // Gráfico de Rosca (Estilo "Revenue Sources" do SB Admin)
+        const ctxDoughnut = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Entradas', 'Saídas'],
+                datasets: [{
+                    data: [@ViewBag.TotalEntradas, @ViewBag.TotalSaidas],
+                    backgroundColor: ['#1cc88a', '#4e73df'],
+                    hoverBackgroundColor: ['#17a673', '#2e59d9'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '80%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                }
+            }
         });
     </script>
 }
