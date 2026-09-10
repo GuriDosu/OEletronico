@@ -29,34 +29,47 @@ namespace OEletronico.Controllers
                     return RedirectToAction("Login", "Auth");
                 }
 
-                // 1. Indicadores Básicos
+                // Indicadores Básicos
                 ViewBag.TotalProdutos = _context.Produtos.Count();
                 ViewBag.TotalColaboradores = _context.Pessoas.Count();
 
                 decimal valorPatrimonioEstoque = _context.Produtos.Sum(p => (decimal?)(p.Quantidade * p.Preco)) ?? 0;
                 ViewBag.ValorPatrimonioEstoque = valorPatrimonioEstoque;
 
-                // 2. Busca segura das movimentações
-                var todasMovimentacoes = _context.MovimentacoesEstoque
+                // PREPARAÇÃO DO FILTRO DE TEMPO
+                var query = _context.MovimentacoesEstoque
                     .Include(m => m.Produto)
-                    .ToList();
+                    .AsQueryable();
 
                 DateTime agora = DateTime.UtcNow;
 
-                // 3. Filtro seguro na memória
-                var movimentacoesFiltradas = todasMovimentacoes.Where(m => {
-                    if (filtro == "dia")
-                        return m.Data.Date == agora.Date;
-                    if (filtro == "semana")
-                        return m.Data >= agora.AddDays(-7);
-                    if (filtro == "mes")
-                        return m.Data.Month == agora.Month && m.Data.Year == agora.Year;
-                    if (filtro == "ano")
-                        return m.Data.Year == agora.Year;
-                    return true;
-                }).ToList();
+                if (filtro == "dia")
+                {
+                    DateTime inicioDia = agora.Date;
+                    DateTime fimDia = inicioDia.AddDays(1);
+                    query = query.Where(m => m.Data >= inicioDia && m.Data < fimDia);
+                }
+                else if (filtro == "semana")
+                {
+                    DateTime inicioSemana = agora.AddDays(-7);
+                    query = query.Where(m => m.Data >= inicioSemana);
+                }
+                else if (filtro == "mes")
+                {
+                    int mes = agora.Month;
+                    int ano = agora.Year;
+                    query = query.Where(m => m.Data.Month == mes && m.Data.Year == ano);
+                }
+                else if (filtro == "ano")
+                {
+                    int ano = agora.Year;
+                    query = query.Where(m => m.Data.Year == ano);
+                }
+                // Se o filtro for "tudo", nenhuma restrição de data é aplicada.
 
-                // 4. Cálculos
+                var movimentacoesFiltradas = query.ToList();
+
+                // Cálculos baseados no período filtrado
                 int totalEntradas = movimentacoesFiltradas.Where(m => m.Tipo == "Entrada").Sum(m => m.Quantidade);
                 int totalSaidas = movimentacoesFiltradas.Where(m => m.Tipo == "Saida").Sum(m => m.Quantidade);
 
@@ -70,9 +83,11 @@ namespace OEletronico.Controllers
                 ViewBag.DinheiroEntrada = dinheiroEntrada;
                 ViewBag.FiltroAtual = filtro;
 
+                // Listas de apoio
                 var estoqueBaixo = _context.Produtos.Where(p => p.Quantidade <= 5).ToList();
 
-                ViewBag.UltimasMovimentacoes = todasMovimentacoes
+                ViewBag.UltimasMovimentacoes = _context.MovimentacoesEstoque
+                    .Include(m => m.Produto)
                     .OrderByDescending(m => m.Id)
                     .Take(5)
                     .ToList();
@@ -81,8 +96,8 @@ namespace OEletronico.Controllers
             }
             catch (Exception ex)
             {
-                // ISSO VAI MOSTRAR O ERRO EXATO NA TELA EM VEZ DE DAR HTTP 500
-                return Content($"<h1 style='color:red;'>Erro Crítico no Dashboard:</h1><pre>{ex.Message}\n\n{ex.StackTrace}</pre>", "text/html");
+                TempData["Erro"] = "Erro interno no Dashboard: " + ex.Message;
+                return RedirectToAction("Index", "Home");
             }
         }
     }
