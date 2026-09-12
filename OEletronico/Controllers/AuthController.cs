@@ -26,9 +26,15 @@ namespace OEletronico.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Se já está logado, redireciona
+            // Se já está logado, redireciona conforme o cargo
             if (HttpContext.Session.GetString("UserId") != null)
-                return RedirectToAction("Index", "Pessoa");
+            {
+                var cargoAtual = HttpContext.Session.GetString("UserCargo");
+                if (cargoAtual == CargoEnum.Admin.ToString())
+                    return RedirectToAction("Index", "Dashboard");
+
+                return RedirectToAction("Perfil", "Pessoa");
+            }
 
             return View();
         }
@@ -68,9 +74,9 @@ namespace OEletronico.Controllers
                 usuario.Pessoa.Nome.Split(' ').Take(2).Select(p => p[0])).ToUpper();
             HttpContext.Session.SetString("UserInitials", iniciais);
 
-            // Admin vai para a lista de colaboradores
+            // ⭐ Admin cai direto no Dashboard
             if (usuario.Pessoa.Cargo == CargoEnum.Admin)
-                return RedirectToAction("Index", "Pessoa");
+                return RedirectToAction("Index", "Dashboard");
 
             // Colaboradores (CLT/Estagiário) vão para o Perfil
             return RedirectToAction("Perfil", "Pessoa");

@@ -47,7 +47,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("PessoaId")
                         .IsUnique();
 
-                    b.ToTable("BancosHoras");
+                    b.ToTable("BancosHoras", (string)null);
                 });
 
             modelBuilder.Entity("OEletronico.Models.MovimentacaoEstoque", b =>
@@ -80,7 +80,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("ProdutoId");
 
-                    b.ToTable("MovimentacoesEstoque");
+                    b.ToTable("MovimentacoesEstoque", (string)null);
                 });
 
             modelBuilder.Entity("OEletronico.Models.Pessoa", b =>
@@ -114,7 +114,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Pessoas");
+                    b.ToTable("Pessoas", (string)null);
 
                     b.HasData(
                         new
@@ -155,7 +155,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("Codigo")
                         .IsUnique();
 
-                    b.ToTable("Produtos");
+                    b.ToTable("Produtos", (string)null);
                 });
 
             modelBuilder.Entity("OEletronico.Models.RegistroPonto", b =>
@@ -188,7 +188,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("PessoaId");
 
-                    b.ToTable("RegistrosPonto");
+                    b.ToTable("RegistrosPonto", (string)null);
                 });
 
             modelBuilder.Entity("OEletronico.Models.Relatorio", b =>
@@ -213,7 +213,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("PessoaId");
 
-                    b.ToTable("Relatorios");
+                    b.ToTable("Relatorios", (string)null);
                 });
 
             modelBuilder.Entity("OEletronico.Models.Usuario", b =>
@@ -243,7 +243,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("PessoaId")
                         .IsUnique();
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", (string)null);
 
                     b.HasData(
                         new

@@ -1,7 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OEletronico.Models;
 using OEletronico.Models.Enums;
+using System;
+using System.Runtime.Intrinsics.X86;
 
 namespace OEletronico.Models.Data
 {
@@ -9,7 +10,6 @@ namespace OEletronico.Models.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // Tabelas originais do sistema
         public DbSet<Pessoa> Pessoas { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Produto> Produtos { get; set; }

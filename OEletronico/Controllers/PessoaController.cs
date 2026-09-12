@@ -180,9 +180,9 @@ namespace OEletronico.Controllers
             TempData["Sucesso"] = $"Colaborador {pessoa.Nome} excluído com sucesso!";
             return RedirectToAction("Index");
         }
-    
-    // ─── PERFIL (GET): Visualizar e editar próprio perfil ──────────
-public async Task<IActionResult> Perfil()
+
+        // ─── PERFIL (GET): Visualizar e editar próprio perfil ──────────
+        public async Task<IActionResult> Perfil()
         {
             if (!EstaLogado()) return RedirecionarLogin();
 
