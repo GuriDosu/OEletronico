@@ -11,8 +11,6 @@ namespace OEletronico.Models
         public CargoEnum Cargo { get; set; }
         public string Setor { get; set; } = string.Empty;
         public DateTime DataAdmissao { get; set; }
-
-
         public Usuario? Usuario { get; set; }
 
         public BancoHoras? BancoHoras { get; set; }

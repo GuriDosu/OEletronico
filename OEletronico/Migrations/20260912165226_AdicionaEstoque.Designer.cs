@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OEletronico.Models.Data;
@@ -11,9 +12,11 @@ using OEletronico.Models.Data;
 namespace OEletronico.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260912165226_AdicionaEstoque")]
+    partial class AdicionaEstoque
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +50,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("PessoaId")
                         .IsUnique();
 
-                    b.ToTable("BancosHoras", (string)null);
+                    b.ToTable("BancosHoras");
                 });
 
             modelBuilder.Entity("OEletronico.Models.MovimentacaoEstoque", b =>
@@ -81,7 +84,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("ProdutoId");
 
-                    b.ToTable("MovimentacoesEstoque", (string)null);
+                    b.ToTable("MovimentacoesEstoque");
                 });
 
             modelBuilder.Entity("OEletronico.Models.Pessoa", b =>
@@ -115,7 +118,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Pessoas", (string)null);
+                    b.ToTable("Pessoas");
 
                     b.HasData(
                         new
@@ -156,7 +159,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("Codigo")
                         .IsUnique();
 
-                    b.ToTable("Produtos", (string)null);
+                    b.ToTable("Produtos");
                 });
 
             modelBuilder.Entity("OEletronico.Models.RegistroPonto", b =>
@@ -189,7 +192,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("PessoaId");
 
-                    b.ToTable("RegistrosPonto", (string)null);
+                    b.ToTable("RegistrosPonto");
                 });
 
             modelBuilder.Entity("OEletronico.Models.Relatorio", b =>
@@ -214,7 +217,7 @@ namespace OEletronico.Migrations
 
                     b.HasIndex("PessoaId");
 
-                    b.ToTable("Relatorios", (string)null);
+                    b.ToTable("Relatorios");
                 });
 
             modelBuilder.Entity("OEletronico.Models.Usuario", b =>
@@ -244,7 +247,7 @@ namespace OEletronico.Migrations
                     b.HasIndex("PessoaId")
                         .IsUnique();
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
 
                     b.HasData(
                         new

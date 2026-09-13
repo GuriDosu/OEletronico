@@ -27,7 +27,7 @@ namespace OEletronico.Models.Data
             modelBuilder.Entity<Pessoa>().HasIndex(p => p.Email).IsUnique();
             modelBuilder.Entity<Produto>().HasIndex(p => p.Codigo).IsUnique();
 
-            // Relacionamentos 1:1 originais
+            
             modelBuilder.Entity<Pessoa>()
                 .HasOne(p => p.Usuario)
                 .WithOne(u => u.Pessoa)

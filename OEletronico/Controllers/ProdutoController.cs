@@ -54,47 +54,6 @@ namespace OEletronico.Controllers
             return View(produtos);
         }
 
-        // ─── EDIT (GET): Formulário de edição (SÓ ADMIN) ─────────────
-        public async Task<IActionResult> Edit(int id)
-        {
-            if (!EstaLogado()) return RedirecionarLogin();
-            if (!EhAdmin()) return Forbid();
-
-            var produto = await _context.Produtos.FindAsync(id);
-            if (produto == null) return NotFound();
-
-            return View(produto);
-        }
-
-        // ─── EDIT (POST): Salva alterações (SÓ ADMIN) ────────────────
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Produto model)
-        {
-            if (!EstaLogado()) return RedirecionarLogin();
-            if (!EhAdmin()) return Forbid();
-            if (!ModelState.IsValid) return View(model);
-
-            var produto = await _context.Produtos.FindAsync(id);
-            if (produto == null) return NotFound();
-
-            if (await _context.Produtos.AnyAsync(p => p.Codigo == model.Codigo && p.Id != id))
-            {
-                ModelState.AddModelError("Codigo", "Este código já está em uso por outro produto.");
-                return View(model);
-            }
-
-            produto.Nome = model.Nome;
-            produto.Codigo = model.Codigo.ToUpper();
-            produto.Preco = model.Preco;
-            produto.Quantidade = model.Quantidade;
-
-            await _context.SaveChangesAsync();
-
-            TempData["Sucesso"] = $"Produto {produto.Nome} atualizado com sucesso!";
-            return RedirectToAction("Index");
-        }
-
         // ─── DELETE (POST): Exclui produto (SÓ ADMIN) ────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]

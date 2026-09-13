@@ -110,7 +110,6 @@
                         {
                             <td>
                                 <div class="action-btns">
-                                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm" title="Editar">✏</a>
                                     <form asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:inline" onsubmit="return confirm('Excluir produto @p.Nome?')">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
