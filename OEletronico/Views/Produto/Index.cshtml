@@ -8,6 +8,97 @@
     var valorEstoque = Model.Sum(p => p.Preco * p.Quantidade);
 }
 
+<style>
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.55);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-overlay.aberto { display: flex; }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 420px;
+        padding: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-box h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #dc2626;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .modal-box p {
+        font-size: 13px;
+        color: #4b5563;
+        margin-bottom: 10px;
+        line-height: 1.5;
+    }
+
+    .modal-nome-alvo {
+        font-weight: 700;
+        color: #111827;
+        background: #fee2e2;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .modal-box input[type="text"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 16px;
+        outline: none;
+    }
+    .modal-box input[type="text"]:focus {
+        border-color: #dc2626;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .modal-btn-cancelar {
+        padding: 9px 16px;
+        border-radius: 8px;
+        border: 1.5px solid #e5e7eb;
+        background: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .modal-btn-confirmar {
+        padding: 9px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #dc2626;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .modal-btn-confirmar:disabled {
+        background: #fca5a5;
+        cursor: not-allowed;
+    }
+</style>
+
 <div class="page-header">
     <div>
         <h1 class="page-title">Produtos</h1>
@@ -110,10 +201,11 @@
                         {
                             <td>
                                 <div class="action-btns">
-                                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:inline" onsubmit="return confirm('Excluir produto @p.Nome?')">
+                                    <form id="formExcluir_@p.Id" asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:none">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
                                     </form>
+                                    <button type="button" class="btn btn-sm btn-danger btn-excluir"
+                                            data-id="@p.Id" data-nome="@p.Nome" title="Excluir">🗑</button>
                                 </div>
                             </td>
                         }
@@ -131,3 +223,65 @@
         </div>
     }
 </div>
+
+
+<div id="modalExcluir" class="modal-overlay">
+    <div class="modal-box">
+        <h3>⚠️ Excluir Produto</h3>
+        <p>
+            Esta ação é <strong>permanente</strong> e também apagará todo o
+            histórico de movimentações deste produto.
+        </p>
+        <p>
+            Digite <span class="modal-nome-alvo" id="modalNomeAlvo"></span> abaixo para confirmar:
+        </p>
+        <input type="text" id="modalInputConfirma" placeholder="Digite o nome do produto" autocomplete="off" />
+        <div class="modal-actions">
+            <button type="button" class="modal-btn-cancelar" onclick="fecharModalExcluir()">Cancelar</button>
+            <button type="button" class="modal-btn-confirmar" id="modalBtnConfirmar" disabled onclick="confirmarExclusao()">
+                Excluir Produto
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let produtoIdExcluir = null;
+        let produtoNomeExcluir = null;
+
+        document.querySelectorAll('.btn-excluir').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                produtoIdExcluir = this.dataset.id;
+                produtoNomeExcluir = this.dataset.nome;
+
+                document.getElementById('modalNomeAlvo').textContent = produtoNomeExcluir;
+                document.getElementById('modalInputConfirma').value = '';
+                document.getElementById('modalBtnConfirmar').disabled = true;
+                document.getElementById('modalExcluir').classList.add('aberto');
+                document.getElementById('modalInputConfirma').focus();
+            });
+        });
+
+        document.getElementById('modalInputConfirma').addEventListener('input', function () {
+            var digitado = this.value.trim().toLowerCase();
+            var esperado = (produtoNomeExcluir || '').trim().toLowerCase();
+            document.getElementById('modalBtnConfirmar').disabled = digitado !== esperado;
+        });
+
+        function fecharModalExcluir() {
+            document.getElementById('modalExcluir').classList.remove('aberto');
+            produtoIdExcluir = null;
+            produtoNomeExcluir = null;
+        }
+
+        function confirmarExclusao() {
+            if (!produtoIdExcluir) return;
+            document.getElementById('formExcluir_' + produtoIdExcluir).submit();
+        }
+
+        document.getElementById('modalExcluir').addEventListener('click', function (e) {
+            if (e.target === this) fecharModalExcluir();
+        });
+    </script>
+}

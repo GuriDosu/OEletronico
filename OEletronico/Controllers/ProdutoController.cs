@@ -65,19 +65,23 @@ namespace OEletronico.Controllers
             var produto = await _context.Produtos.FindAsync(id);
             if (produto == null) return NotFound();
 
-            var temMovimentacoes = await _context.MovimentacoesEstoque
-                .AnyAsync(m => m.ProdutoId == id);
+            var nomeProduto = produto.Nome;
 
-            if (temMovimentacoes)
+            try
             {
-                TempData["Erro"] = $"O produto {produto.Nome} não pode ser excluído pois possui movimentações registradas.";
-                return RedirectToAction("Index");
+                // ⭐ Exclui o produto mesmo com movimentações registradas.
+                // O histórico de movimentações desse produto é apagado
+                // automaticamente em cascata (configuração do EF Core).
+                _context.Produtos.Remove(produto);
+                await _context.SaveChangesAsync();
+
+                TempData["Sucesso"] = $"Produto {nomeProduto} e seu histórico de movimentações foram excluídos com sucesso!";
+            }
+            catch (DbUpdateException)
+            {
+                TempData["Erro"] = $"Não foi possível excluir o produto {nomeProduto}. Tente novamente.";
             }
 
-            _context.Produtos.Remove(produto);
-            await _context.SaveChangesAsync();
-
-            TempData["Sucesso"] = $"Produto {produto.Nome} excluído com sucesso!";
             return RedirectToAction("Index");
         }
 
