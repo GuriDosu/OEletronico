@@ -6,14 +6,82 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
     
     <link rel="stylesheet" href="~/css/site.css" />
+
+    <style>
+            /* ═══════════════════════════════════════════════════
+                       SIDEBAR: só ícones por padrão, expande ao passar o mouse
+                    ═══════════════════════════════════════════════════ */
+            #sidebar {
+                width: 72px;
+                transition: width 0.2s ease;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+
+                #sidebar:hover {
+                    width: 224px;
+                }
+
+                /* Esconde textos por padrão */
+                #sidebar .logo-text,
+                #sidebar .user-text,
+                #sidebar .nav-section,
+                #sidebar .nav-label {
+                    display: none;
+                }
+
+                /* Mostra textos ao passar o mouse */
+                #sidebar:hover .logo-text,
+                #sidebar:hover .user-text {
+                    display: block;
+                }
+
+                #sidebar:hover .nav-section {
+                    display: block;
+                }
+
+                #sidebar:hover .nav-label {
+                    display: inline;
+                }
+
+            .logo-icon-collapsed {
+                display: block;
+                font-size: 22px;
+                text-align: center;
+            }
+
+            #sidebar:hover .logo-icon-collapsed {
+                display: none;
+            }
+
+            .sidebar-logo,
+            .sidebar-user {
+                justify-content: center;
+            }
+
+            #sidebar:hover .sidebar-logo,
+            #sidebar:hover .sidebar-user {
+                justify-content: flex-start;
+            }
+
+            #sidebar .nav-item,
+            #sidebar .logout-link {
+                justify-content: center;
+            }
+
+            #sidebar:hover .nav-item,
+            #sidebar:hover .logout-link {
+                justify-content: flex-start;
+            }
+    </style>
 </head>
 <body>
     <div id="app-layout">
 
         <aside id="sidebar">
-            <div class="sidebar-logo">
-                <span class="logo-icon">⚡</span>
-                <div>
+            <div class="sidebar-logo" style="text-align:center;">
+                <span class="logo-icon-collapsed">⚡</span>
+                <div class="logo-text">
                     <div class="logo-name">O Eletrônico</div>
                     <div class="logo-sub">Gestão Empresarial</div>
                 </div>
@@ -21,7 +89,7 @@
 
             <div class="sidebar-user">
                 <div class="user-avatar">@(Context.Session.GetString("UserInitials") ?? "??")</div>
-                <div>
+                <div class="user-text">
                     <div class="user-name">@(Context.Session.GetString("UserName") ?? "Usuário")</div>
                     <div class="user-role">@(Context.Session.GetString("UserCargo") ?? "")</div>
                 </div>
@@ -31,25 +99,25 @@
 
                 <!-- ─── GERAL (TODOS) ─── -->
                 <div class="nav-section">Geral</div>
-                <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil">
-                    <span class="nav-icon">👤</span> Meu Perfil
+                <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil" title="Meu Perfil">
+                    <span class="nav-icon">👤</span><span class="nav-label">Meu Perfil</span>
                 </a>
-                <a class="nav-item" asp-controller="Produto" asp-action="Index">
-                    <span class="nav-icon">📦</span> Produtos
+                <a class="nav-item" asp-controller="Produto" asp-action="Index" title="Produtos">
+                    <span class="nav-icon">📦</span><span class="nav-label">Produtos</span>
                 </a>
-                <a class="nav-item" asp-controller="Movimentacao" asp-action="Index">
-                    <span class="nav-icon">🗃️</span> Movimentação
+                <a class="nav-item" asp-controller="Movimentacao" asp-action="Index" title="Movimentação">
+                    <span class="nav-icon">🗃️</span><span class="nav-label">Movimentação</span>
                 </a>
 
                 @if (Context.Session.GetString("UserCargo") != "Admin")
                 {
                     <!-- ─── PONTO (SÓ COLABORADOR) ─── -->
                     <div class="nav-section">Ponto</div>
-                    <a class="nav-item" asp-controller="RegistroPonto" asp-action="Index">
-                        <span class="nav-icon">🕐</span> Bater Ponto
+                    <a class="nav-item" asp-controller="RegistroPonto" asp-action="Index" title="Bater Ponto">
+                        <span class="nav-icon">🕐</span><span class="nav-label">Bater Ponto</span>
                     </a>
-                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Index">
-                        <span class="nav-icon">💼</span> Meu Banco de Horas
+                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Index" title="Meu Banco de Horas">
+                        <span class="nav-icon">💼</span><span class="nav-label">Meu Banco de Horas</span>
                     </a>
                 }
 
@@ -57,25 +125,24 @@
                 {
                     <!-- ─── ADMINISTRAÇÃO (SÓ ADMIN) ─── -->
                     <div class="nav-section">Administração</div>
-                    
-                    <!-- NOVO: Link do Dashboard -->
-                    <a class="nav-item" asp-controller="Dashboard" asp-action="Index">
-                        <span class="nav-icon">📈</span> Dashboard
+
+                    <a class="nav-item" asp-controller="Dashboard" asp-action="Index" title="Dashboard">
+                        <span class="nav-icon">📈</span><span class="nav-label">Dashboard</span>
                     </a>
 
-                    <a class="nav-item" asp-controller="Pessoa" asp-action="Index">
-                        <span class="nav-icon">👥</span> Colaboradores
+                    <a class="nav-item" asp-controller="Pessoa" asp-action="Index" title="Colaboradores">
+                        <span class="nav-icon">👥</span><span class="nav-label">Colaboradores</span>
                     </a>
-                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Admin">
-                        <span class="nav-icon">📊</span> Banco de Horas
+                    <a class="nav-item" asp-controller="BancoHoras" asp-action="Admin" title="Banco de Horas">
+                        <span class="nav-icon">📊</span><span class="nav-label">Banco de Horas</span>
                     </a>
                 }
 
             </nav>
 
             <div class="sidebar-footer">
-                <a asp-controller="Auth" asp-action="Logout" class="logout-link">
-                    <span>⏻</span> Sair
+                <a asp-controller="Auth" asp-action="Logout" class="logout-link" title="Sair">
+                    <span>⏻</span><span class="nav-label">Sair</span>
                 </a>
             </div>
         </aside>
