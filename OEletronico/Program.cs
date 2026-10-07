@@ -44,9 +44,6 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// ───────────────────────────────────────────────────────────
-// CRIA/RESETA O ADMIN PADRÃO NA INICIALIZAÇÃO
-// ───────────────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<OEletronico.Models.Data.AppDbContext>();
