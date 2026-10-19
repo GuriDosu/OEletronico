@@ -1,29 +1,18 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace OEletronico.Models
+﻿namespace OEletronico.Models
 {
     public class MovimentacaoEstoque
     {
-        [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "O tipo de movimentação é obrigatório.")]
-        [StringLength(20)]
-        public string Tipo { get; set; } = string.Empty; // "Entrada" ou "Saida"
+        public int ProdutoId { get; set; } // Obrigatório para saber qual produto moveu
+        public Produto? Produto { get; set; }
 
+        public string Tipo { get; set; } = string.Empty; // Ex: "Entrada" ou "Saída"
         public int Quantidade { get; set; }
+        public DateTime Data { get; set; } = DateTime.UtcNow;
 
-        [Required]
-        public DateTime Data { get; set; } 
-
+        // Quem fez a movimentação
         public int PessoaId { get; set; }
-
-        public Pessoa Pessoa { get; set; } = null!;
-
-        public int ProdutoId { get; set; }
-
-        public Produto Produto { get; set; } = null!;
+        public Pessoa? Pessoa { get; set; }
     }
 }

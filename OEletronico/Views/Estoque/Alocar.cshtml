@@ -1,0 +1,43 @@
+﻿@model OEletronico.Models.DTOs.AlocarDTO
+@{
+    ViewData["Title"] = "Alocar Produto";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- CONTAINER CENTRALIZADO -->
+<div style="max-width: 650px; margin: 40px auto; padding: 0 20px;">
+    
+    <!-- CABEÇALHO DA PÁGINA -->
+    <div class="page-header" style="margin-bottom: 24px; text-align: center;">
+        <h1 class="page-title" style="font-size: 26px; font-weight: 700; color: #111827; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📍 Alocar Localização Física
+        </h1>
+        <p class="page-sub" style="font-size: 15px; color: #4b5563; margin-top: 6px;">
+            Produto: <strong style="color: #111827;">@ViewBag.ProdutoNome</strong>
+        </p>
+    </div>
+
+    <!-- FORMULÁRIO EM CARTÃO (Passando a categoria atual na rota) -->
+    <form asp-action="Alocar" asp-route-categoria="@ViewBag.CategoriaAtual" method="post" style="background: #ffffff; border-radius: 14px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 32px;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ProdutoId" />
+
+        <div style="margin-bottom: 20px;">
+            <label asp-for="Prateleira" style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #374151;">Prateleira Física *</label>
+            <input asp-for="Prateleira" placeholder="Ex: Corredor A, Prateleira 3..." style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; background-color: #fff;" />
+            <span asp-validation-for="Prateleira" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: block;"></span>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label asp-for="NumeroIdentificador" style="display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #374151;">Caixa / Lote *</label>
+            <input asp-for="NumeroIdentificador" placeholder="Ex: Caixa 04..." style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; background-color: #fff;" />
+            <span asp-validation-for="NumeroIdentificador" style="color: #ef4444; font-size: 12px; margin-top: 4px; display: block;"></span>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid #f3f4f6; padding-top: 20px;">
+            <!-- O botão de cancelar também devolve para a categoria correta -->
+            <a asp-action="Index" asp-route-categoria="@ViewBag.CategoriaAtual" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #d1d5db; background: #ffffff; color: #374151; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center;">Cancelar</a>
+            <button type="submit" style="padding: 10px 20px; border-radius: 8px; border: none; background: #10b981; color: #ffffff; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">✓ Salvar Localização</button>
+        </div>
+    </form>
+</div>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace OEletronico.Models.DTOs
 {
@@ -40,5 +41,10 @@ namespace OEletronico.Models.DTOs
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Mínimo de 6 caracteres")]
         [DataType(DataType.Password)]
         public string Senha { get; set; } = string.Empty;
+
+        // Propriedade adicionada para capturar o CNPJ do menu suspenso
+        public int? CnpjId { get; set; }
+
     }
+
 }

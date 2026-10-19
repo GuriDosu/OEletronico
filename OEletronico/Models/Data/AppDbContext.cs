@@ -2,7 +2,6 @@
 using OEletronico.Models;
 using OEletronico.Models.Enums;
 using System;
-using System.Runtime.Intrinsics.X86;
 
 namespace OEletronico.Models.Data
 {
@@ -17,17 +16,25 @@ namespace OEletronico.Models.Data
         public DbSet<BancoHoras> BancosHoras { get; set; }
         public DbSet<MovimentacaoEstoque> MovimentacoesEstoque { get; set; }
         public DbSet<Relatorio> Relatorios { get; set; }
+        public DbSet<Cnpj> Cnpjs { get; set; }
+
+        // ⭐ NOVO — Tabela do Estoque Físico (Prateleiras)
+        public DbSet<Estoque> Estoques { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Índices únicos
+            // ─── ÍNDICES ÚNICOS ──────────────────────────────────────────────
             modelBuilder.Entity<Usuario>().HasIndex(u => u.Login).IsUnique();
             modelBuilder.Entity<Pessoa>().HasIndex(p => p.Email).IsUnique();
             modelBuilder.Entity<Produto>().HasIndex(p => p.Codigo).IsUnique();
+            modelBuilder.Entity<Cnpj>().HasIndex(c => c.Numero).IsUnique();
 
-            
+            // O número identificador físico do estoque não pode se repetir
+            modelBuilder.Entity<Estoque>().HasIndex(e => e.NumeroIdentificador).IsUnique();
+
+            // ─── RELACIONAMENTOS ORIGINAIS ───────────────────────────────────
             modelBuilder.Entity<Pessoa>()
                 .HasOne(p => p.Usuario)
                 .WithOne(u => u.Pessoa)
@@ -40,6 +47,46 @@ namespace OEletronico.Models.Data
                 .HasForeignKey<BancoHoras>(b => b.PessoaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // 1 CNPJ para N colaboradores
+            modelBuilder.Entity<Pessoa>()
+                .HasOne(p => p.Cnpj)
+                .WithMany(c => c.Pessoas)
+                .HasForeignKey(p => p.CnpjId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ─── ⭐ NOVOS RELACIONAMENTOS (ESTOQUE E MOVIMENTAÇÃO) ⭐ ─────────
+
+            // 1) Produto <-> Estoque (1 para 1)
+            // Isso resolve permanentemente aquele erro chato do "ProdutoId1"
+            modelBuilder.Entity<Produto>()
+                .HasOne(p => p.Estoque)
+                .WithOne(e => e.Produto)
+                .HasForeignKey<Estoque>(e => e.ProdutoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 2) Estoque <-> Pessoa (Quem fez a última atualização na prateleira)
+            modelBuilder.Entity<Estoque>()
+                .HasOne(e => e.PessoaAtualizacao)
+                .WithMany()
+                .HasForeignKey(e => e.PessoaAtualizacaoId)
+                .OnDelete(DeleteBehavior.Restrict); // Restrict evita erro no SQL Server/Postgres
+
+            // 3) Movimentacao <-> Pessoa (Quem deu entrada/saída)
+            modelBuilder.Entity<MovimentacaoEstoque>()
+                .HasOne(m => m.Pessoa)
+                .WithMany()
+                .HasForeignKey(m => m.PessoaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 4) Movimentacao <-> Produto (O produto que foi movimentado)
+            modelBuilder.Entity<MovimentacaoEstoque>()
+                .HasOne(m => m.Produto)
+                .WithMany(p => p.Movimentacoes)
+                .HasForeignKey(m => m.ProdutoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ─── OUTRAS CONFIGURAÇÕES ────────────────────────────────────────
             // Tipo da coluna de preço
             modelBuilder.Entity<Produto>()
                 .Property(p => p.Preco)

@@ -1,4 +1,7 @@
-﻿<head>
+﻿@inject OEletronico.Models.Data.AppDbContext _context
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] — O Eletrônico</title>
@@ -9,39 +12,37 @@
 
     <style>
             /* ═══════════════════════════════════════════════════
-                       SIDEBAR: só ícones por padrão, expande ao passar o mouse
-                    ═══════════════════════════════════════════════════ */
+                           SIDEBAR: expande suavemente sem quebrar o texto
+                        ═══════════════════════════════════════════════════ */
             #sidebar {
                 width: 72px;
                 transition: width 0.2s ease;
                 overflow: hidden;
                 flex-shrink: 0;
+                white-space: nowrap;
             }
 
                 #sidebar:hover {
-                    width: 224px;
+                    width: 240px;
                 }
 
-                /* Esconde textos por padrão */
                 #sidebar .logo-text,
                 #sidebar .user-text,
                 #sidebar .nav-section,
                 #sidebar .nav-label {
                     display: none;
+                    white-space: nowrap;
                 }
 
-                /* Mostra textos ao passar o mouse */
                 #sidebar:hover .logo-text,
-                #sidebar:hover .user-text {
-                    display: block;
-                }
-
+                #sidebar:hover .user-text,
                 #sidebar:hover .nav-section {
                     display: block;
                 }
 
                 #sidebar:hover .nav-label {
-                    display: inline;
+                    display: inline-block;
+                    margin-left: 10px;
                 }
 
             .logo-icon-collapsed {
@@ -55,20 +56,14 @@
             }
 
             .sidebar-logo,
-            .sidebar-user {
-                justify-content: center;
-            }
-
-            #sidebar:hover .sidebar-logo,
-            #sidebar:hover .sidebar-user {
-                justify-content: flex-start;
-            }
-
+            .sidebar-user,
             #sidebar .nav-item,
             #sidebar .logout-link {
                 justify-content: center;
             }
 
+            #sidebar:hover .sidebar-logo,
+            #sidebar:hover .sidebar-user,
             #sidebar:hover .nav-item,
             #sidebar:hover .logout-link {
                 justify-content: flex-start;
@@ -96,8 +91,30 @@
             </div>
 
             <nav class="sidebar-nav">
+                @{
+                    // 1. Pegamos o cargo na sessão
+                    var cargo = Context.Session.GetString("UserCargo") ?? "";
+                    
+                    // 2. Busca o Setor do utilizador direto do Banco de Dados em tempo real
+                    string setor = "";
+                    var pessoaIdStr = Context.Session.GetString("UserPessoaId");
+                    if (!string.IsNullOrEmpty(pessoaIdStr))
+                    {
+                        int pId = int.Parse(pessoaIdStr);
+                        var pessoaObj = _context.Pessoas.Find(pId);
+                        if (pessoaObj != null)
+                        {
+                            setor = pessoaObj.Setor ?? "";
+                        }
+                    }
 
-                <!-- ─── GERAL (TODOS) ─── -->
+                    // 3. Regras de Ocultar/Exibir (Cobre tanto Cargo Estoquista quanto Setor Estoque)
+                    bool isAdmin = cargo == "Admin";
+                    bool isColaborador = cargo == "CLT" || cargo == "Estagiario" || cargo == "Estoquista";
+                    bool isEstoque = setor == "Estoque" || cargo == "Estoquista";
+                }
+
+                <!-- ─── GERAL (TODOS VEEM) ─── -->
                 <div class="nav-section">Geral</div>
                 <a class="nav-item" asp-controller="Pessoa" asp-action="Perfil" title="Meu Perfil">
                     <span class="nav-icon">👤</span><span class="nav-label">Meu Perfil</span>
@@ -105,13 +122,18 @@
                 <a class="nav-item" asp-controller="Produto" asp-action="Index" title="Produtos">
                     <span class="nav-icon">📦</span><span class="nav-label">Produtos</span>
                 </a>
-                <a class="nav-item" asp-controller="Movimentacao" asp-action="Index" title="Movimentação">
-                    <span class="nav-icon">🗃️</span><span class="nav-label">Movimentação</span>
-                </a>
 
-                @if (Context.Session.GetString("UserCargo") != "Admin")
+                <!-- ─── MOVIMENTAÇÃO GERAL (SÓ APARECE SE NÃO FOR DO ESTOQUE) ─── -->
+                @if (isAdmin || (isColaborador && !isEstoque))
                 {
-                    <!-- ─── PONTO (SÓ COLABORADOR) ─── -->
+                    <a class="nav-item" asp-controller="Movimentacao" asp-action="Index" title="Movimentação">
+                        <span class="nav-icon">🗃️</span><span class="nav-label">Movimentação</span>
+                    </a>
+                }
+
+                <!-- ─── PONTO (SÓ FUNCIONÁRIOS COMUNS VEEM) ─── -->
+                @if (isColaborador)
+                {
                     <div class="nav-section">Ponto</div>
                     <a class="nav-item" asp-controller="RegistroPonto" asp-action="Index" title="Bater Ponto">
                         <span class="nav-icon">🕐</span><span class="nav-label">Bater Ponto</span>
@@ -121,15 +143,30 @@
                     </a>
                 }
 
-                @if (Context.Session.GetString("UserCargo") == "Admin")
+                <!-- ─── ESTOQUE FÍSICO (SUBSTITUI A LOGÍSTICA ANTIGA) ─── -->
+                @if (isAdmin || isEstoque)
                 {
-                    <!-- ─── ADMINISTRAÇÃO (SÓ ADMIN) ─── -->
-                    <div class="nav-section">Administração</div>
+                    <div class="nav-section">Estoque Físico</div>
+                    
+                    <a class="nav-item" asp-controller="Estoque" asp-action="Index" asp-route-categoria="Produtos" title="Produtos Gerais">
+                        <span class="nav-icon" style="margin-left: 8px;">📦</span><span class="nav-label">Produtos</span>
+                    </a>
+                    
+                    <a class="nav-item" asp-controller="Estoque" asp-action="Index" asp-route-categoria="LED" title="Módulo de LEDs">
+                        <span class="nav-icon" style="margin-left: 8px;">💡</span><span class="nav-label">Painéis LED</span>
+                    </a>
+                }
 
+                <!-- ─── ADMINISTRAÇÃO (SÓ ADMIN VÊ) ─── -->
+                @if (isAdmin)
+                {
+                    <div class="nav-section">Administração</div>
                     <a class="nav-item" asp-controller="Dashboard" asp-action="Index" title="Dashboard">
                         <span class="nav-icon">📈</span><span class="nav-label">Dashboard</span>
                     </a>
-
+                    <a class="nav-item" asp-controller="Cnpj" asp-action="Index" title="Contratos (CNPJ)">
+                        <span class="nav-icon">🏢</span><span class="nav-label">Contratos (CNPJ)</span>
+                    </a>
                     <a class="nav-item" asp-controller="Pessoa" asp-action="Index" title="Colaboradores">
                         <span class="nav-icon">👥</span><span class="nav-label">Colaboradores</span>
                     </a>
@@ -137,7 +174,6 @@
                         <span class="nav-icon">📊</span><span class="nav-label">Banco de Horas</span>
                     </a>
                 }
-
             </nav>
 
             <div class="sidebar-footer">
@@ -174,3 +210,4 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+</html>

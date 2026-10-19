@@ -1,0 +1,82 @@
+﻿@model List<OEletronico.Models.Pessoa>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Vínculos de CNPJ";
+    var cnpjs = ViewBag.Cnpjs as List<OEletronico.Models.Cnpj> ?? new List<OEletronico.Models.Cnpj>();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Vínculos de CNPJ</h1>
+        <p class="page-sub">Escolha o CNPJ (contrato) de cada colaborador</p>
+    </div>
+    <a asp-action="Index" class="btn">← Voltar para CNPJs</a>
+</div>
+
+<div class="card">
+    @if (Model.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                    <th>CNPJ atual</th>
+                    <th>Alterar para</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="colab-cell">
+                                <div class="colab-avatar">@p.Nome.Substring(0, 1).ToUpper()</div>
+                                <div class="colab-nome">@p.Nome</div>
+                            </div>
+                        </td>
+                        <td>@p.Cargo</td>
+                        <td>@p.Setor</td>
+                        <td>
+                            @if (p.Cnpj != null)
+                            {
+                                <span class="badge badge-blue" title="@p.Cnpj.Numero">@p.Cnpj.RazaoSocial</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-gray">Sem CNPJ</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="SalvarVinculo" method="post" style="display:flex;gap:8px;align-items:center;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="pessoaId" value="@p.Id" />
+                                <select name="cnpjId" style="padding:7px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;min-width:200px;">
+                                    <option value="">— Nenhum —</option>
+                                    @foreach (var c in cnpjs)
+                                    {
+                                        <option value="@c.Id" selected="@(p.CnpjId == c.Id)">@c.RazaoSocial — @c.Numero</option>
+                                    }
+                                    @if (p.Cnpj != null && !p.Cnpj.Ativo)
+                                    {
+                                        <option value="@p.Cnpj.Id" selected="selected">@p.Cnpj.RazaoSocial (inativo)</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Salvar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <p>Nenhum colaborador cadastrado ainda.</p>
+            <p style="font-size:13px;color:#6b7280;">Cadastre colaboradores na aba <strong>👥 Colaboradores</strong>.</p>
+        </div>
+    }
+</div>

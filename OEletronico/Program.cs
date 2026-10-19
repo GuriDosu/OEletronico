@@ -79,6 +79,30 @@ using (var scope = app.Services.CreateScope())
         adminUser.Senha = BCrypt.Net.BCrypt.HashPassword("admin123");
         context.SaveChanges();
     }
+
+    // ⭐ NOVO — CNPJs padrão (só insere os que ainda não existem)
+    try
+    {
+        var cnpjsPadrao = new[]
+        {
+            new OEletronico.Models.Cnpj { Numero = "44.281.097/0001-23", RazaoSocial = "Duartec",      NomeFantasia = "Duartec" },
+            new OEletronico.Models.Cnpj { Numero = "41.921.281/0001-00", RazaoSocial = "Ollintek",     NomeFantasia = "Ollintek" },
+            new OEletronico.Models.Cnpj { Numero = "40.316.508/0001-18", RazaoSocial = "O Eletronico", NomeFantasia = "O Eletronico" },
+            new OEletronico.Models.Cnpj { Numero = "61.301.782/0001-93", RazaoSocial = "Drive Shop",   NomeFantasia = "Drive Shop" }
+        };
+
+        foreach (var cnpj in cnpjsPadrao)
+        {
+            if (!context.Cnpjs.Any(c => c.Numero == cnpj.Numero))
+                context.Cnpjs.Add(cnpj);
+        }
+        context.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        // Se a tabela Cnpjs ainda não existir, o sistema continua abrindo normalmente
+        Console.WriteLine($"[AVISO] CNPJs padrão não foram inseridos: {ex.Message}");
+    }
 }
 
 app.UseHttpsRedirection();

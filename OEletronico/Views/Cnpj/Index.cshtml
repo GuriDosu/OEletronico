@@ -1,0 +1,106 @@
+﻿@model List<OEletronico.Models.Cnpj>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "CNPJs";
+    var vinculos = ViewBag.Vinculos as Dictionary<int, int> ?? new Dictionary<int, int>();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">CNPJs</h1>
+        <p class="page-sub">Contratos que podem ser vinculados aos colaboradores</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a asp-action="Vinculos" class="btn">👥 Vínculos</a>
+        <a asp-action="Create" class="btn btn-primary">+ Novo CNPJ</a>
+    </div>
+</div>
+
+<!-- FILTRO -->
+<form method="get" asp-action="Index">
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" name="busca" value="@ViewBag.Busca" placeholder="Buscar por CNPJ, razão social ou nome fantasia..." />
+        </div>
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a asp-action="Index" class="btn">Limpar</a>
+    </div>
+</form>
+
+<!-- TABELA -->
+<div class="card">
+    @if (Model.Any())
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>CNPJ</th>
+                    <th>Razão Social</th>
+                    <th>Nome Fantasia</th>
+                    <th>Colaboradores</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    var total = vinculos.ContainsKey(c.Id) ? vinculos[c.Id] : 0;
+
+                    <tr>
+                        <td>
+                            <code style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;">@c.Numero</code>
+                        </td>
+                        <td><strong>@c.RazaoSocial</strong></td>
+                        <td class="text-muted">@(string.IsNullOrWhiteSpace(c.NomeFantasia) ? "—" : c.NomeFantasia)</td>
+                        <td>
+                            @if (total > 0)
+                            {
+                                <span class="badge badge-blue">@total colaborador(es)</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-gray">Nenhum</span>
+                            }
+                        </td>
+                        <td>
+                            @if (c.Ativo)
+                            {
+                                <span class="badge badge-green">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-red">Inativo</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm" title="Editar">✏</a>
+
+                                <form asp-action="AlternarStatus" asp-route-id="@c.Id" method="post" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm" title="@(c.Ativo ? "Desativar" : "Ativar")">@(c.Ativo ? "🔒" : "🔓")</button>
+                                </form>
+
+                                <form asp-action="Delete" asp-route-id="@c.Id" method="post" style="display:inline"
+                                      onsubmit="return confirm('Tem certeza que deseja excluir este CNPJ?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Excluir">🗑</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🏢</div>
+            <p>Nenhum CNPJ cadastrado ainda.</p>
+            <a asp-action="Create" class="btn btn-primary">Cadastrar o primeiro CNPJ</a>
+        </div>
+    }
+</div>

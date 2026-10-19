@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OEletronico.Models;
 using OEletronico.Models.Data;
@@ -34,6 +35,7 @@ namespace OEletronico.Controllers
 
             var pessoas = await _context.Pessoas
                 .Include(p => p.Usuario)
+                .Include(p => p.Cnpj) // Incluído para mostrar o nome da empresa na tabela se quiser
                 .Where(p => p.Cargo != CargoEnum.Admin)
                 .OrderBy(p => p.Nome)
                 .ToListAsync();
@@ -42,12 +44,18 @@ namespace OEletronico.Controllers
         }
 
         // ─── CREATE (GET): Tela de cadastro ───────────────────────────
+        [HttpGet]
         public IActionResult Create()
         {
             if (!EstaLogado()) return RedirecionarLogin();
             if (!EhAdmin()) return Forbid();
+
+            // Busca os CNPJs ativos para preencher a caixinha
+            ViewBag.CnpjId = new SelectList(_context.Cnpjs.Where(c => c.Ativo), "Id", "RazaoSocial");
+
             return View();
         }
+
 
         // ─── CREATE (POST): Salva novo colaborador ────────────────────
         [HttpPost]
@@ -56,12 +64,19 @@ namespace OEletronico.Controllers
         {
             if (!EstaLogado()) return RedirecionarLogin();
             if (!EhAdmin()) return Forbid();
-            if (!ModelState.IsValid) return View(dto);
+
+            // Se der erro de formulário, recarrega a caixinha do CNPJ para a tela não quebrar
+            if (!ModelState.IsValid)
+            {
+                ViewBag.CnpjId = new SelectList(_context.Cnpjs.Where(c => c.Ativo), "Id", "RazaoSocial");
+                return View(dto);
+            }
 
             // Verifica se login já existe
             if (await _context.Usuarios.AnyAsync(u => u.Login == dto.Login))
             {
                 ModelState.AddModelError("Login", "Este login já está em uso.");
+                ViewBag.CnpjId = new SelectList(_context.Cnpjs.Where(c => c.Ativo), "Id", "RazaoSocial");
                 return View(dto);
             }
 
@@ -69,17 +84,19 @@ namespace OEletronico.Controllers
             if (await _context.Pessoas.AnyAsync(p => p.Email == dto.Email))
             {
                 ModelState.AddModelError("Email", "Este email já está cadastrado.");
+                ViewBag.CnpjId = new SelectList(_context.Cnpjs.Where(c => c.Ativo), "Id", "RazaoSocial");
                 return View(dto);
             }
 
-            // Cria a Pessoa
+            // Cria a Pessoa e adiciona o CNPJ selecionado
             var pessoa = new Pessoa
             {
                 Nome = dto.Nome,
                 Email = dto.Email,
                 Cargo = Enum.Parse<CargoEnum>(dto.Cargo),
                 Setor = dto.Setor,
-                DataAdmissao = DateTime.SpecifyKind(dto.DataAdmissao, DateTimeKind.Utc)
+                DataAdmissao = DateTime.SpecifyKind(dto.DataAdmissao, DateTimeKind.Utc),
+                CnpjId = dto.CnpjId // <--- CNPJ VINDO DA TELA E SALVO AQUI
             };
             _context.Pessoas.Add(pessoa);
             await _context.SaveChangesAsync();
@@ -120,6 +137,10 @@ namespace OEletronico.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (pessoa == null) return NotFound();
+
+            // Permite editar o CNPJ do colaborador já existente
+            ViewBag.CnpjId = new SelectList(_context.Cnpjs.Where(c => c.Ativo), "Id", "RazaoSocial", pessoa.CnpjId);
+
             return View(pessoa);
         }
 
@@ -142,6 +163,7 @@ namespace OEletronico.Controllers
             pessoa.Cargo = model.Cargo;
             pessoa.Setor = model.Setor;
             pessoa.DataAdmissao = DateTime.SpecifyKind(model.DataAdmissao, DateTimeKind.Utc);
+            pessoa.CnpjId = model.CnpjId; // <--- Atualiza o CNPJ caso tenha mudado no Edit
 
             // Se foi informada nova senha, atualiza
             if (!string.IsNullOrEmpty(NovaSenha) && pessoa.Usuario != null)
@@ -182,6 +204,7 @@ namespace OEletronico.Controllers
         }
 
         // ─── PERFIL (GET): Visualizar e editar próprio perfil ──────────
+        // ─── PERFIL (GET): Visualizar e editar próprio perfil ──────────
         public async Task<IActionResult> Perfil()
         {
             if (!EstaLogado()) return RedirecionarLogin();
@@ -190,6 +213,7 @@ namespace OEletronico.Controllers
 
             var pessoa = await _context.Pessoas
                 .Include(p => p.Usuario)
+                .Include(p => p.Cnpj) // <--- ADICIONADO: Busca o CNPJ no banco para mostrar na tela!
                 .FirstOrDefaultAsync(p => p.Id == pessoaId);
 
             if (pessoa == null) return NotFound();
@@ -211,10 +235,12 @@ namespace OEletronico.Controllers
 
             if (pessoa == null) return NotFound();
 
-            // Atualiza dados básicos
+            // Atualiza APENAS os dados básicos permitidos
             pessoa.Nome = model.Nome;
             pessoa.Email = model.Email;
-            pessoa.Setor = model.Setor;
+
+            // A LINHA "pessoa.Setor = model.Setor;" FOI REMOVIDA DAQUI!
+            // Agora o Colaborador não consegue mais alterar a função, apenas o Admin.
 
             // Atualiza sessão com novo nome/iniciais
             HttpContext.Session.SetString("UserName", pessoa.Nome);

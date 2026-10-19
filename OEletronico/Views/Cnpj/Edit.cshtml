@@ -1,0 +1,72 @@
+﻿@model OEletronico.Models.Cnpj
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Editar CNPJ";
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Editar CNPJ</h1>
+        <p class="page-sub">Atualize os dados do contrato</p>
+    </div>
+</div>
+
+<div class="card form-layout">
+    <div class="card-header">
+        <span class="card-header-icon">🏢</span>
+        <span class="card-header-title">Dados do contrato</span>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="DataCadastro" />
+
+            <div class="form-grid">
+                <div class="field-group full">
+                    <label asp-for="Numero">CNPJ <span class="required">*</span></label>
+                    <input asp-for="Numero" maxlength="18" autocomplete="off" />
+                    <span asp-validation-for="Numero" class="field-error"></span>
+                </div>
+
+                <div class="field-group full">
+                    <label asp-for="RazaoSocial">Razão Social <span class="required">*</span></label>
+                    <input asp-for="RazaoSocial" />
+                    <span asp-validation-for="RazaoSocial" class="field-error"></span>
+                </div>
+
+                <div class="field-group full">
+                    <label asp-for="NomeFantasia">Nome Fantasia</label>
+                    <input asp-for="NomeFantasia" />
+                    <span asp-validation-for="NomeFantasia" class="field-error"></span>
+                </div>
+
+                <div class="field-group full">
+                    <label>
+                        <input type="checkbox" asp-for="Ativo" style="width:auto; margin-right:8px;" />
+                        Contrato ativo
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a asp-action="Index" class="btn">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var campoCnpj = document.querySelector('input[name="Numero"]');
+        campoCnpj.addEventListener('input', function () {
+            var v = this.value.replace(/\D/g, '').substring(0, 14);
+            v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            this.value = v;
+        });
+    </script>
+}

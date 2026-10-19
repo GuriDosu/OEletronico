@@ -16,79 +16,122 @@
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
 
+        <!-- ─── CARTÃO: DADOS PESSOAIS ─── -->
         <div class="card form-card">
             <div class="card-header">
                 <span class="card-header-icon">👤</span>
                 <span class="card-header-title">Dados pessoais</span>
             </div>
+            
             <div class="card-body">
-                <div class="form-grid">
-                    <div class="field-group full">
-                        <label asp-for="Nome">Nome completo <span class="required">*</span></label>
-                        <input asp-for="Nome" placeholder="Ex.: João da Silva" />
-                        <span asp-validation-for="Nome" class="field-error"></span>
+                <!-- O form-grid alinha os itens lado a lado -->
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <!-- NOME COMPLETO (Ocupa a linha toda) -->
+                    <div class="field-group full" style="grid-column: 1 / -1;">
+                        <label asp-for="Nome" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Nome completo <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <input asp-for="Nome" placeholder="Ex.: João da Silva" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+                        <span asp-validation-for="Nome" class="field-error text-danger"></span>
                     </div>
 
-                    <div class="field-group full">
-                        <label asp-for="Email">Email <span class="required">*</span></label>
-                        <input asp-for="Email" type="email" placeholder="joao.silva@empresa.com" />
-                        <span asp-validation-for="Email" class="field-error"></span>
+                    <!-- E-MAIL (Ocupa a linha toda) -->
+                    <div class="field-group full" style="grid-column: 1 / -1;">
+                        <label asp-for="Email" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            E-mail <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <input asp-for="Email" type="email" placeholder="Ex.: joao@email.com" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+                        <span asp-validation-for="Email" class="field-error text-danger"></span>
                     </div>
 
+                    <!-- CARGO -->
                     <div class="field-group">
-                        <label asp-for="Cargo">Cargo <span class="required">*</span></label>
-                        <select asp-for="Cargo">
-                            <option value="">Selecione...</option>
-                            <option value="CLT">CLT</option>
-                            <option value="Estagiario">Estagiário</option>
+                        <label asp-for="Cargo" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Cargo <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <select asp-for="Cargo" asp-items="Html.GetEnumSelectList<OEletronico.Models.Enums.CargoEnum>()" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;">
+                            <option value="">Selecione o cargo...</option>
                         </select>
-                        <span asp-validation-for="Cargo" class="field-error"></span>
+                        <span asp-validation-for="Cargo" class="field-error text-danger"></span>
                     </div>
 
+                    <!-- SETOR (Único e sem erro CS1963) -->
                     <div class="field-group">
-                        <label asp-for="Setor">Setor <span class="required">*</span></label>
-                        <input asp-for="Setor" placeholder="Ex.: TI, Financeiro" />
-                        <span asp-validation-for="Setor" class="field-error"></span>
+                        <label for="Setor" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Setor <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="Setor" name="Setor" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;">
+                            <option value="">Selecione o setor...</option>
+                            <option value="E-Commerce"> E-Commerce</option>
+                            <option value="Estoque"> Estoque</option>
+                        </select>
+                        <span class="field-error text-danger" data-valmsg-for="Setor" data-valmsg-replace="true"></span>
                     </div>
 
+                    <!-- EMPRESA (CNPJ) -->
                     <div class="field-group">
-                        <label asp-for="DataAdmissao">Data de admissão <span class="required">*</span></label>
-                        <input asp-for="DataAdmissao" type="date" />
-                        <span asp-validation-for="DataAdmissao" class="field-error"></span>
+                        <label asp-for="CnpjId" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Empresa (CNPJ) <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <select asp-for="CnpjId" asp-items="ViewBag.CnpjId" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;">
+                            <option value="">Vincular a uma empresa...</option>
+                        </select>
+                        <span asp-validation-for="CnpjId" class="field-error text-danger"></span>
                     </div>
+
+                    <!-- DATA DE ADMISSÃO -->
+                    <div class="field-group">
+                        <label asp-for="DataAdmissao" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Data de admissão <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <input asp-for="DataAdmissao" type="date" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+                        <span asp-validation-for="DataAdmissao" class="field-error text-danger"></span>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <div class="card form-card" style="margin-top:20px">
+        <!-- ─── CARTÃO: ACESSO AO SISTEMA ─── -->
+        <div class="card form-card" style="margin-top: 24px;">
             <div class="card-header">
                 <span class="card-header-icon">🔐</span>
                 <span class="card-header-title">Acesso ao sistema</span>
             </div>
             <div class="card-body">
-                <div class="form-grid">
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
                     <div class="field-group">
-                        <label asp-for="Login">Login <span class="required">*</span></label>
-                        <input asp-for="Login" placeholder="nome.sobrenome" />
-                        <span asp-validation-for="Login" class="field-error"></span>
+                        <label asp-for="Login" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Login <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <input asp-for="Login" placeholder="Mín. 5 caracteres" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+                        <span asp-validation-for="Login" class="field-error text-danger"></span>
                     </div>
 
                     <div class="field-group">
-                        <label asp-for="Senha">Senha inicial <span class="required">*</span></label>
-                        <input asp-for="Senha" type="password" placeholder="Mín. 6 caracteres" />
-                        <span asp-validation-for="Senha" class="field-error"></span>
+                        <label asp-for="Senha" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                            Senha inicial <span class="required" style="color: #ef4444;">*</span>
+                        </label>
+                        <input asp-for="Senha" type="password" placeholder="Mín. 6 caracteres" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+                        <span asp-validation-for="Senha" class="field-error text-danger"></span>
                     </div>
+
                 </div>
-                <div class="info-box">
-                    <span class="info-icon">ℹ</span>
+                
+                <div class="info-box" style="margin-top: 16px; padding: 12px; background-color: #eff6ff; border-radius: 8px; color: #1e40af; font-size: 13px;">
+                    <span class="info-icon">ℹ️</span>
                     O colaborador poderá alterar a senha após o primeiro acesso.
                 </div>
             </div>
         </div>
 
-        <div class="form-actions">
-            <a asp-action="Index" class="btn btn-outline">Cancelar</a>
-            <button type="submit" class="btn btn-primary">✓ Cadastrar colaborador</button>
+        <!-- ─── BOTÕES DE AÇÃO ─── -->
+        <div class="form-actions" style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
+            <a asp-action="Index" class="btn btn-outline" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #d1d5db; background: #ffffff; color: #374151; text-decoration: none; font-weight: 600;">Cancelar</a>
+            <button type="submit" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; border: none; background: #2563eb; color: #ffffff; cursor: pointer; font-weight: 600;">✓ Cadastrar colaborador</button>
         </div>
+        
     </form>
 </div>

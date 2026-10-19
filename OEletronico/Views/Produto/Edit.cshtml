@@ -1,62 +1,83 @@
 ﻿@model OEletronico.Models.Produto
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Editar Produto";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-header">
+<div class="page-header" style="margin-bottom: 24px;">
     <div>
-        <h1 class="page-title">Editar produto</h1>
-        <p class="page-sub">Atualize os dados de <strong>@Model.Nome</strong></p>
+        <h1 class="page-title" style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">Editar produto</h1>
+        <p class="page-sub" style="font-size: 14px; color: #6b7280; margin-top: 4px;">Atualize as informações do catálogo</p>
     </div>
-    <a asp-action="Index" class="btn btn-outline">← Voltar</a>
 </div>
 
-<div class="form-layout">
-    <form asp-action="Edit" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Id" />
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
 
-        <div class="card form-card">
-            <div class="card-header">
-                <span class="card-header-icon">📦</span>
-                <span class="card-header-title">Dados do produto</span>
+    <div class="card form-card" style="background: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); padding: 24px; margin-bottom: 24px;">
+        
+        <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin-top: 0; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">
+            📦 Dados do produto
+        </h3>
+
+        <!-- Grid para alinhar os campos lado a lado -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            
+            <!-- CÓDIGO -->
+            <div>
+                <label asp-for="Codigo" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: #374151;">
+                    Código <span style="color: #ef4444;">*</span>
+                </label>
+                <input asp-for="Codigo" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #ffffff; font-size: 14px;" />
+                <span asp-validation-for="Codigo" class="text-danger" style="font-size: 12px;"></span>
             </div>
-            <div class="card-body">
-                <div class="form-grid">
-                    <div class="field-group">
-                        <label asp-for="Codigo">Código</label>
-                        <input asp-for="Codigo" style="text-transform:uppercase" />
-                        <span asp-validation-for="Codigo" class="field-error"></span>
-                    </div>
 
-                    <div class="field-group">
-                        <label asp-for="Quantidade">Quantidade</label>
-                        <input asp-for="Quantidade" type="number" min="0" />
-                        <span class="field-hint" style="font-size:11px;color:#6b7280;">
-                            Para ajustes maiores, use movimentações de estoque
-                        </span>
-                        <span asp-validation-for="Quantidade" class="field-error"></span>
-                    </div>
-
-                    <div class="field-group full">
-                        <label asp-for="Nome">Nome do produto</label>
-                        <input asp-for="Nome" />
-                        <span asp-validation-for="Nome" class="field-error"></span>
-                    </div>
-
-                    <div class="field-group">
-                        <label asp-for="Preco">Preço unitário (R$)</label>
-                        <input asp-for="Preco" type="number" step="0.01" min="0" />
-                        <span asp-validation-for="Preco" class="field-error"></span>
-                    </div>
-                </div>
+            <!-- QUANTIDADE -->
+            <div>
+                <label asp-for="Quantidade" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: #374151;">
+                    Quantidade em estoque <span style="color: #ef4444;">*</span>
+                </label>
+                <input asp-for="Quantidade" type="number" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #ffffff; font-size: 14px;" />
+                <span asp-validation-for="Quantidade" class="text-danger" style="font-size: 12px;"></span>
             </div>
-        </div>
 
-        <div class="form-actions">
-            <a asp-action="Index" class="btn btn-outline">Cancelar</a>
-            <button type="submit" class="btn btn-primary">✓ Salvar alterações</button>
+            <!-- NOME DO PRODUTO (Ocupa a linha toda) -->
+            <div style="grid-column: 1 / -1;">
+                <label asp-for="Nome" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: #374151;">
+                    Nome do produto <span style="color: #ef4444;">*</span>
+                </label>
+                <input asp-for="Nome" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #ffffff; font-size: 14px;" />
+                <span asp-validation-for="Nome" class="text-danger" style="font-size: 12px;"></span>
+            </div>
+
+            <!-- PREÇO UNITÁRIO -->
+            <div>
+                <label asp-for="Preco" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: #374151;">
+                    Preço unitário (R$) <span style="color: #ef4444;">*</span>
+                </label>
+                <input asp-for="Preco" type="number" step="0.01" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #ffffff; font-size: 14px;" />
+                <span asp-validation-for="Preco" class="text-danger" style="font-size: 12px;"></span>
+            </div>
+
+            <!-- CAMPO DE CATEGORIA (Geral vs LED) -->
+            <div>
+                <label asp-for="Categoria" style="font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; color: #374151;">
+                    Categoria (Direcionamento) <span style="color: #ef4444;">*</span>
+                </label>
+                <select asp-for="Categoria" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; background-color: #ffffff; cursor: pointer; font-size: 14px;">
+                    <option value="Geral">📦 Produto Geral</option>
+                    <option value="LED">💡 Painel LED</option>
+                </select>
+                <span style="font-size: 12px; color: #1d4ed8; margin-top: 4px; display: block;">Define em qual aba do Estoque Físico este item vai aparecer.</span>
+            </div>
+
         </div>
-    </form>
-</div>
+    </div>
+
+    <!-- BOTÕES DE AÇÃO -->
+    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <a asp-action="Index" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #d1d5db; background: #ffffff; color: #374151; text-decoration: none; font-weight: 600; font-size: 14px;">Cancelar</a>
+        <button type="submit" style="padding: 10px 20px; border-radius: 8px; border: none; background: #2563eb; color: #ffffff; cursor: pointer; font-weight: 600; font-size: 14px;">✓ Salvar Alterações</button>
+    </div>
+</form>

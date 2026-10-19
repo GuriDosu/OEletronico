@@ -2,8 +2,11 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Meu Perfil";
+    
+    // Variáveis calculadas no topo para não dar erro no HTML
     var iniciais = string.Join("", Model.Nome.Split(' ').Take(2).Select(n => n[0])).ToUpper();
     var cargoLabel = Model.Cargo.ToString() == "Estagiario" ? "Estagiário" : Model.Cargo.ToString();
+    var badgeClass = Model.Cargo.ToString() == "CLT" ? "badge-blue" : "badge-gray";
 }
 
 <div class="page-header">
@@ -23,15 +26,30 @@
             <div>
                 <div style="font-size:20px;font-weight:600;color:#111827;">@Model.Nome</div>
                 <div style="font-size:14px;color:#6b7280;margin-top:4px;">
-                    <span class="badge @(Model.Cargo.ToString() == "CLT" ? "badge-blue" : "badge-gray")">@cargoLabel</span>
+                    <span class="badge @badgeClass">@cargoLabel</span>
                     &nbsp;·&nbsp; @Model.Setor
                 </div>
+                
                 <div style="font-size:13px;color:#6b7280;margin-top:6px;">
                     📧 @Model.Email
                 </div>
                 <div style="font-size:13px;color:#6b7280;margin-top:2px;">
                     📅 Admitido em @Model.DataAdmissao.ToString("dd/MM/yyyy")
                 </div>
+                
+                <!-- EXIBIÇÃO DA EMPRESA/CNPJ -->
+                @if (Model.Cnpj != null)
+                {
+                    <div style="font-size:13px;color:#374151;margin-top:4px;font-weight:500;">
+                        🏢 Cnpj: @Model.Cnpj.RazaoSocial <span style="color:#6b7280;font-weight:normal;">(@Model.Cnpj.Numero)</span>
+                    </div>
+                }
+                else
+                {
+                    <div style="font-size:13px;color:#6b7280;margin-top:4px;">
+                        🏢 Empresa: <em>Sem vínculo de CNPJ</em>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -60,9 +78,14 @@
                         <label asp-for="Email">Email</label>
                         <input asp-for="Email" type="email" />
                     </div>
+                    
+                    <!-- CAMPO SETOR BLOQUEADO -->
                     <div class="field-group full">
                         <label asp-for="Setor">Setor</label>
-                        <input asp-for="Setor" />
+                        <input asp-for="Setor" readonly="readonly" style="background-color: #f3f4f6; cursor: not-allowed; color: #6b7280;" title="Apenas o Administrador pode alterar a sua função." />
+                        <span style="font-size: 11px; color: #6b7280; margin-top: 4px; display: block;">
+                            🔒 Apenas o administrador pode alterar o seu setor/função.
+                        </span>
                     </div>
                 </div>
             </div>

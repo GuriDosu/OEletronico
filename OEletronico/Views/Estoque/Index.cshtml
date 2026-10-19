@@ -1,0 +1,100 @@
+﻿@model IEnumerable<OEletronico.Models.Produto>
+@{
+    ViewData["Title"] = "Estoque Físico";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string categoriaAtual = ViewBag.CategoriaAtual as string ?? "Produtos";
+    string userCargo = Context.Session.GetString("UserCargo");
+}
+
+<div class="page-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="page-title" style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">@ViewBag.TituloEstoque</h1>
+        <p class="page-sub" style="font-size: 14px; color: #6b7280; margin-top: 4px;">Gerencie as prateleiras, lotes e status dos itens no galpão físico</p>
+    </div>
+    
+    <!-- EXIBE O BOTÃO DE EXPORTAR EXCLUSIVAMENTE PARA ADMINISTRADORES -->
+    @if (userCargo == "Admin")
+    {
+        <div>
+            <a asp-action="ExportarExcel" asp-route-categoria="@categoriaAtual" class="btn btn-primary" style="background-color: #2563eb; color: #ffffff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px;" title="Baixar planilha formatada em Excel">
+                📄 Exportar Planilha
+            </a>
+        </div>
+    }
+</div>
+
+<div class="card" style="background: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; color: #374151;">
+                    <th style="padding: 14px 16px; font-weight: 600;">Código</th>
+                    <th style="padding: 14px 16px; font-weight: 600;">Nome do Produto</th>
+                    <th style="padding: 14px 16px; font-weight: 600; text-align: center;">Qtd Atual</th>
+                    <th style="padding: 14px 16px; font-weight: 600;">Prateleira / Caixa</th>
+                    <th style="padding: 14px 16px; font-weight: 600; text-align: right;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr style="border-bottom: 1px solid #f3f4f6;">
+                            <td style="padding: 14px 16px; color: #4b5563; font-weight: 500;">@item.Codigo</td>
+                            <td style="padding: 14px 16px; color: #111827; font-weight: 600;">@item.Nome</td>
+                            <td style="padding: 14px 16px; text-align: center;">
+                                <span style="background-color: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 9999px; font-weight: 600; font-size: 12px;">
+                                    @item.Quantidade un.
+                                </span>
+                            </td>
+                            <td style="padding: 14px 16px; color: #4b5563;">
+                                @if (item.Estoque != null && (!string.IsNullOrEmpty(item.Estoque.Prateleira) || !string.IsNullOrEmpty(item.Estoque.NumeroIdentificador)))
+                                {
+                                    <span style="display: inline-block; background-color: #ecfdf5; color: #047857; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500;">
+                                        📍 <strong>@item.Estoque.Prateleira</strong> / 📦 @item.Estoque.NumeroIdentificador
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="color: #9ca3af; font-style: italic; font-size: 13px;">Não alocado</span>
+                                }
+                            </td>
+                            <td style="padding: 14px 16px; text-align: right;">
+                                <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                                    
+                                    <!-- BOTÃO ALOCAR / PRATELEIRA -->
+                                    <a asp-action="Alocar" asp-route-id="@item.Id" asp-route-categoria="@categoriaAtual" style="background-color: #ffffff; color: #374151; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #d1d5db; font-size: 14px;" title="Definir Prateleira e Caixa">
+                                        📍
+                                    </a>
+
+                                    <!-- BOTÃO MOVIMENTAR -->
+                                    <a asp-action="Movimentar" asp-route-id="@item.Id" asp-route-categoria="@categoriaAtual" style="background-color: #ffffff; color: #2563eb; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid #d1d5db; font-size: 14px;" title="Entrada / Saída de Quantidade">
+                                        🔄
+                                    </a>
+
+                                    <!-- BOTÃO INATIVAR -->
+                                    <form asp-action="Inativar" asp-route-id="@item.Id" asp-route-categoria="@categoriaAtual" method="post" style="display:inline; margin:0;" onsubmit="return confirm('Deseja realmente inativar este item do estoque físico?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" style="background-color: #ffffff; color: #dc2626; width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #fecaca; cursor: pointer; font-size: 14px;" title="Inativar Produto">
+                                            🗑️
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #6b7280;">
+                            Nenhum item encontrado nesta categoria de estoque físico.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
